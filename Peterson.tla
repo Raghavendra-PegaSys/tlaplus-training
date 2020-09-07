@@ -46,10 +46,14 @@ a4(self) == /\ pc[self] = "a4"
             /\ flag' = [flag EXCEPT ![self] = FALSE]
             /\ turn' = turn            
             
-\*proc(self) == a0(self) \/ a1(self) \/ a2(self) \/ a3a(self) \/ a3b(self) \/ cs(self) \/ a4(self)
 proc(self) == a0(self) \/ a1(self) \/ a2(self) \/ cs(self) \/ a4(self) \/ a3a(self) \/ a3b(self)
 
 Next == \E self \in {0,1}: proc(self)
+
+\* Properties are specified as a temporal property from the starting state
+\* Here we are specifying the possible executions of the system
+\* Any run whose first state satisfies Init, and every state and its next satisfies 
+\* Next is a valid behaviour of the system.
 
 Spec == Init /\ [][Next]_vars
 
@@ -67,6 +71,7 @@ I == \A i \in {0,1}:
 
 Inv == TypeOK /\ I
 
+\* For any valid, MutualExclusion is satisfied in all states. 
 THEOREM Spec => []MutualExclusion
 <1>1 Init => Inv
     BY DEF Init, Inv, TypeOK, I
@@ -93,9 +98,38 @@ THEOREM Spec => []MutualExclusion
 <1>3 Inv => MutualExclusion
     BY DEF Inv, MutualExclusion, TypeOK, I, Not
 <1>4 QED
+    \* Temporal reasoning is required to prove 
+    \* []Inv => []MutualExclusion from Inv => MutualExclusion
+    \* Init /\ [][Next]_vars => []Inv from Init /\ [Next]_vars => Inv
     BY <1>1, <1>2, <1>3, PTL DEF Spec, MutualExclusion, Inv, TypeOK, I, Init, Next, vars, Not
+
+\* Liveness
+Wait(i) == (pc[i] = "a3a") \/ (pc[i] = "a3b")
+Blocked(i) == (flag[Not(i)] /\ turn = Not(i))
+CS(i) == pc[i] = "cs"
+FairSpec == Spec /\ WF_vars(proc(0)) /\ WF_vars(proc(1))
+\*Success == (Wait(0) ~> CS(0)) /\ (Wait(1) ~> CS(1))
+Success == (Wait(0) ~> CS(0))
+
+LEMMA Invariance == Spec => []Inv
+
+\* Liveness Theorem
+THEOREM Liveness == FairSpec => Success
+<1>1 []Inv /\ [][Next]_vars /\ WF_vars(proc(0)) => Success
+\*    <2>1 SUFFICES [][Next]_vars /\ WF_vars(proc(0)) => ((Inv /\ Wait(0)) ~> CS(0))
+    <2>1 SUFFICES ASSUME [][Next]_vars /\ WF_vars(proc(0))
+                    PROVE (Inv /\ Wait(0)) ~> CS(0)
+        BY PTL DEF Success
+    <2>2 Inv /\ Wait(0) ~> (Wait(0) /\ ~Blocked(0) /\ ENABLED <<(a3a(0) /\ a3b(0))>>_vars)
+        <3> QED
+\*    <2>3 Wait(0) /\ ~Blocked(0) /\ <<(a3a(0) /\ a3b(0))>>_vars => CS(0)'
+\*        BY DEF Inv, Wait, proc, TypeOK, I, CS, Not, a3a, a3b, vars
+    <2>4 QED
+        BY <2>2 DEF Inv, Wait, CS, Blocked, TypeOK, I
+<1>2 QED   
+    BY Invariance, <1>1 DEF FairSpec, Init, Spec, Success, Wait, CS, Next, proc, Inv, TypeOK, I, Not
 
 =============================================================================
 \* Modification History
-\* Last modified Wed Sep 02 11:47:21 AEST 2020 by raghavendra
+\* Last modified Mon Sep 07 12:36:01 AEST 2020 by raghavendra
 \* Created Mon Aug 31 12:09:32 AEST 2020 by raghavendra
