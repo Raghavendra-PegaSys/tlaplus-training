@@ -25,18 +25,42 @@ a2(self) == /\ pc[self] = "a2"
             /\ flag' = flag
             /\ turn' = Not(self)
             
-a3a(self) == /\ pc[self] = "a3a"
-            /\ (IF flag[Not(self)]
-                    THEN /\ pc' = [pc EXCEPT ![self] = "a3b"]
-                    ELSE /\ pc' = [pc EXCEPT ![self] = "cs"])
-            /\ UNCHANGED <<flag, turn>>
+\*a3a(self) == /\ pc[self] = "a3a"
+\*            /\ (IF flag[Not(self)]
+\*                    THEN /\ pc' = [pc EXCEPT ![self] = "a3b"]
+\*                    ELSE /\ pc' = [pc EXCEPT ![self] = "cs"])
+\*            /\ UNCHANGED <<flag, turn>>
 
-a3b(self) == /\ pc[self] = "a3b"
-            /\ (IF turn = Not(self)
-                THEN /\ pc' = [pc EXCEPT ![self] = "a3a"]
-                ELSE /\ pc' = [pc EXCEPT ![self] = "cs"])
-            /\ UNCHANGED <<flag, turn>>
-                        
+a3a_cs(self) == 
+    /\ pc[self] = "a3a"
+    /\ ~flag[Not(self)]
+    /\ pc' = [pc EXCEPT ![self] = "cs"]
+    /\ UNCHANGED <<flag, turn>>
+    
+a3a_a3b(self) == 
+    /\ pc[self] = "a3a"
+    /\ flag[Not(self)]
+    /\ pc' = [pc EXCEPT ![self] = "a3b"]
+    /\ UNCHANGED <<flag, turn>>
+    
+\*a3b(self) == /\ pc[self] = "a3b"
+\*            /\ (IF turn = Not(self)
+\*                THEN /\ pc' = [pc EXCEPT ![self] = "a3a"]
+\*                ELSE /\ pc' = [pc EXCEPT ![self] = "cs"])
+\*            /\ UNCHANGED <<flag, turn>>
+
+a3b_cs(self) == 
+    /\ pc[self] = "a3b"
+    /\ turn = self
+    /\ pc' = [pc EXCEPT ![self] = "cs"]
+    /\ UNCHANGED <<flag, turn>>
+   
+a3b_a3a(self) == 
+    /\ pc[self] = "a3b"
+    /\ turn = Not(self)
+    /\ pc' = [pc EXCEPT ![self] = "a3a"]
+    /\ UNCHANGED <<flag, turn>>
+                     
 cs(self) == /\ pc[self] = "cs"
             /\ pc' = [pc EXCEPT ![self] = "a4"]
             /\ UNCHANGED <<flag, turn>>
@@ -46,7 +70,16 @@ a4(self) == /\ pc[self] = "a4"
             /\ flag' = [flag EXCEPT ![self] = FALSE]
             /\ turn' = turn            
             
-proc(self) == a0(self) \/ a1(self) \/ a2(self) \/ cs(self) \/ a4(self) \/ a3a(self) \/ a3b(self)
+proc(self) == 
+    \/ a0(self) 
+    \/ a1(self) 
+    \/ a2(self) 
+    \/ cs(self) 
+    \/ a4(self) 
+    \/ a3a_cs(self) 
+    \/ a3a_a3b(self) 
+    \/ a3b_cs(self)
+    \/ a3b_a3a(self)
 
 Next == \E self \in {0,1}: proc(self)
 
@@ -80,7 +113,7 @@ THEOREM Spec => []MutualExclusion
             PROVE Inv'
         BY DEF Inv, TypeOK, I, vars
     <2>2 TypeOK'
-        BY <2>1 DEF Inv, Next, a0, a1, a2, a3a, a3b, cs, a4, proc, TypeOK, Not
+        BY <2>1 DEF Inv, Next, a0, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4, proc, TypeOK, Not
     <2>3 I'
         <3>1 SUFFICES ASSUME NEW j \in {0,1}
                 PROVE I!(j)'
@@ -88,9 +121,9 @@ THEOREM Spec => []MutualExclusion
         <3>2 PICK i \in {0,1} : proc(i)
             BY <2>1 DEF Next
         <3>3 CASE i = j
-            BY <2>1, <3>2, <3>3 DEF Inv, I, TypeOK, proc, a0, a1, a2, a3a, a3b, cs, a4, Not
+            BY <2>1, <3>2, <3>3 DEF Inv, I, TypeOK, proc, a0, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4, Not
         <3>4 CASE i # j
-            BY <2>1, <3>2, <3>4 DEF Inv, I, TypeOK, proc, a0, a1, a2, a3a, a3b, cs, a4, Not
+            BY <2>1, <3>2, <3>4 DEF Inv, I, TypeOK, proc, a0, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4, Not
         <3>5 QED
             BY <3>3, <3>4
     <2>4 QED          
@@ -104,32 +137,47 @@ THEOREM Spec => []MutualExclusion
     BY <1>1, <1>2, <1>3, PTL DEF Spec, MutualExclusion, Inv, TypeOK, I, Init, Next, vars, Not
 
 \* Liveness
+    
 Wait(i) == (pc[i] = "a3a") \/ (pc[i] = "a3b")
-Blocked(i) == (flag[Not(i)] /\ turn = Not(i))
 CS(i) == pc[i] = "cs"
-FairSpec == Spec /\ WF_vars(proc(0)) /\ WF_vars(proc(1))
-\*Success == (Wait(0) ~> CS(0)) /\ (Wait(1) ~> CS(1))
-Success == (Wait(0) ~> CS(0))
+WF(i) == 
+    /\ WF_vars(a0(i))
+    /\ WF_vars(a1(i))
+    /\ WF_vars(a2(i))
+    /\ WF_vars(a3a_cs(i) \/ a3b_cs(i))
+    /\ WF_vars(a3a_a3b(i) \/ a3b_a3a(i))
+    /\ WF_vars(cs(i))
+    /\ WF_vars(a4(i))
+A(i) == a3a_cs(i) \/ a3b_cs(i)
+WillEnterCSNext(i) == 
+    /\ (pc[i] = "a3a" /\ ~flag[Not(i)])
+    /\ (pc[i] = "a3b" /\ turn = i)     
+FairSpec == Spec /\ WF(0) /\ WF(1)
 
 LEMMA Invariance == Spec => []Inv
 
-\* Liveness Theorem
-THEOREM Liveness == FairSpec => Success
-<1>1 []Inv /\ [][Next]_vars /\ WF_vars(proc(0)) => Success
-\*    <2>1 SUFFICES [][Next]_vars /\ WF_vars(proc(0)) => ((Inv /\ Wait(0)) ~> CS(0))
-    <2>1 SUFFICES ASSUME [][Next]_vars /\ WF_vars(proc(0))
-                    PROVE (Inv /\ Wait(0)) ~> CS(0)
-        BY PTL DEF Success
-    <2>2 Inv /\ Wait(0) ~> (Wait(0) /\ ~Blocked(0) /\ ENABLED <<(a3a(0) /\ a3b(0))>>_vars)
-        <3> QED
-\*    <2>3 Wait(0) /\ ~Blocked(0) /\ <<(a3a(0) /\ a3b(0))>>_vars => CS(0)'
-\*        BY DEF Inv, Wait, proc, TypeOK, I, CS, Not, a3a, a3b, vars
-    <2>4 QED
-        BY <2>2 DEF Inv, Wait, CS, Blocked, TypeOK, I
+THEOREM FairSpec => Wait(0) ~> CS(0)
+<1>1 []Inv /\ [][Next]_vars /\ WF(0) /\ WF(1) => Wait(0) ~> CS(0)
+    <2>1 SUFFICES [][Next]_vars /\ WF(0) /\ WF(1) => (Inv /\ Wait(0)) ~> CS(0)
+        BY PTL
+    <2>2 SUFFICES [][Next]_vars /\ WF_vars(A(0)) => (Inv /\ Wait(0)) ~> CS(0)
+        BY DEF A, WF
+    <2>3 [][Next]_vars /\ WF_vars(A(0)) => (Inv /\ Wait(0) /\ WillEnterCSNext(0)) ~> CS(0)
+        <3>1 ([Next]_vars /\ Inv /\ Wait(0) /\ WillEnterCSNext(0)) => ((Inv /\ Wait(0) /\ WillEnterCSNext(0))' \/ CS(0)')
+            BY Invariance DEF Inv, TypeOK, I, Spec, Next, proc, Not, Wait, WillEnterCSNext, CS
+        <3>2 <<Next /\ A(0)>>_vars /\ Inv /\ Wait(0) /\ WillEnterCSNext(0) => CS(0)'
+            BY Invariance DEF Inv, TypeOK, I, Wait, WillEnterCSNext, CS, A
+        <3>3 Inv /\ Wait(0) /\ WillEnterCSNext(0) => ENABLED <<A(0)>>_vars
+            BY Invariance DEF A, Inv, TypeOK, I, Wait, WillEnterCSNext 
+        <3>4 QED
+            BY <3>1, <3>2, <3>3, PTL DEF CS, Wait, Inv, TypeOK, I
+    <2>4 [][Next]_vars /\ WF_vars(A(0)) => (Inv /\ Wait(0) /\ ~WillEnterCSNext(0)) ~> CS(0)    
+    <2>5 QED
+        BY <2>4, <2>3, PTL
 <1>2 QED   
-    BY Invariance, <1>1 DEF FairSpec, Init, Spec, Success, Wait, CS, Next, proc, Inv, TypeOK, I, Not
-
+    BY Invariance, <1>1 DEF FairSpec, Init, Spec, Wait, CS, Next, proc, Inv, TypeOK, I, Not
+    
 =============================================================================
 \* Modification History
-\* Last modified Mon Sep 07 12:36:01 AEST 2020 by raghavendra
+\* Last modified Sat Sep 12 00:09:46 AEST 2020 by raghavendra
 \* Created Mon Aug 31 12:09:32 AEST 2020 by raghavendra
