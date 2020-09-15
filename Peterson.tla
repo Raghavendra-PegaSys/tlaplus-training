@@ -181,7 +181,7 @@ LEMMA LP2a == [][Next]_vars /\ WF_vars(a2(1)) => P2a ~> P2b
 BY L1P2a, L2P2a, L3P2a, PTL
 
 LEMMA LP2c1 == [][Next]_vars /\ WF_vars(a3b_cs(0)) => (pc[0] = "a3b" /\ P2b) ~> P2c
-LEMMA LP2c2 == [][Next]_vars /\ WF_vars(a3b_cs(0)) => P2c ~> CS(0)
+LEMMA LP2c2 == [][Next]_vars /\ WF_vars(a3a_cs(0) \/ a3a_a3b(0) \/ a3b_cs(0)) => P2c ~> CS(0)
 
 \* Case pc[0] = a3b. Then P2b ~> P2c ~> CS(0)
 LEMMA LP2c == [][Next]_vars /\ WF_vars(a3b_cs(0)) => (pc[0] = "a3b" /\ P2b) ~> CS(0)
@@ -194,21 +194,26 @@ LEMMA LP2c3 == [][Next]_vars /\ WF_vars(a3b_cs(0)) => (pc[0] = "a3a" /\ flag[1] 
 LEMMA P1a == (pc[0] = "a3a") /\ ~flag[1] /\ P2b => P1
     BY DEF P1, P2b, WillEnterCSNext, Not
 
-LEMMA LP2b == [][Next]_vars /\ WF_vars(a3b_cs(0)) => P2b ~> CS(0)
+LEMMA LP2b == [][Next]_vars /\ WF_vars(a3a_cs(0) \/ a3a_a3b(0) \/ a3b_cs(0)) => P2b ~> CS(0)
     \* Case pc[0] = a3a /\ ~flag[1]. Then P2b ~> CS(0). This is the same as LP1.
-    <1>1 [][Next]_vars /\ WF_vars(a3a_cs(0)) => pc[0] = "a3a" /\ ~flag[1] /\ P2b ~> CS(0)
+    <1>1 [][Next]_vars /\ WF_vars(a3a_cs(0) \/ a3a_a3b(0) \/ a3b_cs(0)) => pc[0] = "a3a" /\ ~flag[1] /\ P2b ~> CS(0)
 \*        <2>6 QED
-        BY P1a, LP1 DEF P1, WillEnterCSNext, Not
+        BY P1a, LP1 DEF P1, WillEnterCSNext, Not, P2b
     \* Case pc[0] = a3a /\ flag[1]. Then P2b ~> P2c
-    <1>2 [][Next]_vars /\ WF_vars(a3b_cs(0)) => pc[0] = "a3a" /\ flag[1] /\ P2b ~> CS(0)
+    <1>2 [][Next]_vars /\ WF_vars(a3a_cs(0) \/ a3a_a3b(0) \/ a3b_cs(0)) => pc[0] = "a3a" /\ flag[1] /\ P2b ~> P2c
         <2>6 QED
+    <1>3 [][Next]_vars /\ WF_vars(a3a_cs(0) \/ a3a_a3b(0) \/ a3b_cs(0)) => pc[0] = "a3a" /\ flag[1] /\ P2b ~> CS(0)
+        BY <1>2, LP2c2, PTL
+    <1>4 [][Next]_vars /\ WF_vars(a3a_cs(0) \/ a3a_a3b(0) \/ a3b_cs(0)) => pc[0] = "a3a" /\ P2b ~> CS(0)
+        BY <1>1, <1>3, PTL
     \* Case pc[0] = a3b. Then P2b ~> P2c ~> CS(0)
-    <1>3 [][Next]_vars /\ WF_vars(a3b_cs(0)) => (pc[0] = "a3b" /\ P2b) ~> CS(0)
+    <1>5 [][Next]_vars /\ WF_vars(a3a_cs(0) \/ a3a_a3b(0) \/ a3b_cs(0)) => (pc[0] = "a3b" /\ P2b) ~> CS(0)
         <2>6 QED    
 \*    BY LP2c3, P1a, LP1, LP2c , PTL DEF P2b, Wait, P1, WillEnterCSNext, Not, Inv, TypeOK, I
-    <1>4 QED
-        BY <1>1, <1>2, <1>3, PTL DEF P2b, Wait, WillEnterCSNext, Not
+    <1>6 QED
+        BY <1>4, <1>5, PTL DEF Wait, P2b
 
+LEMMA LLP2 == 
 \*LEMMA L1P2c == [Next]_vars /\ pc[0] = "a3a" /\ P2b => (pc[0] = "a3a" /\ P2b)' \/ P2c'
 \*LEMMA L2P2c == <<Next /\ a3a_a3b(0)>>_vars /\ (pc[0] = "a3a" /\ P2b) => P2c'
 \*LEMMA L3P2c == pc[0] = "a3a" /\ P2b => ENABLED <<a3a_a3b(0)>>_vars
@@ -242,5 +247,5 @@ THEOREM FairSpec => Wait(0) ~> CS(0)
     
 =============================================================================
 \* Modification History
-\* Last modified Tue Sep 15 17:45:41 AEST 2020 by raghavendra
+\* Last modified Tue Sep 15 23:22:52 AEST 2020 by raghavendra
 \* Created Mon Aug 31 12:09:32 AEST 2020 by raghavendra
