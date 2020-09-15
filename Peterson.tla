@@ -152,15 +152,15 @@ A(i) == a3a_cs(i) \/ a3b_cs(i)
 WillEnterCSNext(i) == 
     /\ (pc[i] = "a3a" => ~flag[Not(i)])
     /\ (pc[i] = "a3b" => turn = i)     
-FairSpec == Spec /\ WF(0) /\ WF(1)
 
 LEMMA Invariance == Spec => []Inv
 
+\* ENABLED action required here is A(0)
 P1 == Inv /\ Wait(0) /\ WillEnterCSNext(0) /\ ~(pc[1] = "a1")
 LEMMA L1P1 == [Next]_vars /\ P1 => P1' \/ CS(0)'
-LEMMA L2P1 == <<Next /\ A(0)>>_vars /\ P1 => CS(0)'
-LEMMA L3P1 == P1 => ENABLED <<A(0)>>_vars
-LEMMA LP1 == [][Next]_vars /\ WF_vars(A(0)) => P1 ~> CS(0)
+LEMMA L2P1 == <<Next>>_vars /\ P1 => CS(0)'
+LEMMA L3P1 == P1 => ENABLED <<Next>>_vars
+LEMMA LP1 == [][Next]_vars /\ WF_vars(Next) => P1 ~> CS(0)
 BY L1P1, L2P1, L3P1, PTL
 
 P2 == Inv /\ Wait(0) /\ WillEnterCSNext(0) /\ pc[1] = "a1"
@@ -168,17 +168,19 @@ P2a == Inv /\ Wait(0) /\ pc[1] = "a2"
 P2b == Inv /\ Wait(0) /\ pc[1] = "a3a" /\ turn = 0
 P2c == Inv /\ pc[0] = "a3b" /\ turn = 0 /\ Wait(1)
 
+\* ENABLED action required here is a1(1)
 LEMMA L1P2 == [Next]_vars /\ P2 => P2' \/ P2a'
-LEMMA L2P2 == <<Next /\ a1(1)>>_vars /\ P2 => P2a'
-LEMMA L3P2 == P2 => ENABLED <<a1(1)>>_vars
-LEMMA LP2 == [][Next]_vars /\ WF_vars(a1(1)) => P2 ~> P2a
-BY L1P2, L2P2, L3P2, PTL
+LEMMA L2P2 == <<Next>>_vars /\ P2 => P2a'
+LEMMA L3P2 == P2 => ENABLED <<Next>>_vars 
+LEMMA LP2 == [][Next]_vars /\ WF_vars(Next) => P2 ~> P2a
+    BY L1P2, L2P2, L3P2, PTL DEF Next, proc
 
+\* ENABLED action required here is a2(1)
 LEMMA L1P2a == [Next]_vars /\ P2a => P2a' \/ P2b'
-LEMMA L2P2a == <<Next /\ a2(1)>>_vars /\ P2a => P2b'
-LEMMA L3P2a == P2a => ENABLED <<a2(1)>>_vars
-LEMMA LP2a == [][Next]_vars /\ WF_vars(a2(1)) => P2a ~> P2b
-BY L1P2a, L2P2a, L3P2a, PTL
+LEMMA L2P2a == <<Next>>_vars /\ P2a => P2b'
+LEMMA L3P2a == P2a => ENABLED <<Next>>_vars
+LEMMA LP2a == [][Next]_vars /\ WF_vars(Next) => P2a ~> P2b
+BY L1P2a, L2P2a, L3P2a, PTL DEF Next, proc
 
 LEMMA LP2c1 == [][Next]_vars /\ WF_vars(a3b_cs(0)) => (pc[0] = "a3b" /\ P2b) ~> P2c
 LEMMA LP2c2 == [][Next]_vars /\ WF_vars(a3a_cs(0) \/ a3a_a3b(0) \/ a3b_cs(0)) => P2c ~> CS(0)
@@ -194,58 +196,46 @@ LEMMA LP2c3 == [][Next]_vars /\ WF_vars(a3b_cs(0)) => (pc[0] = "a3a" /\ flag[1] 
 LEMMA P1a == (pc[0] = "a3a") /\ ~flag[1] /\ P2b => P1
     BY DEF P1, P2b, WillEnterCSNext, Not
 
-LEMMA LP2b == [][Next]_vars /\ WF_vars(a3a_cs(0) \/ a3a_a3b(0) \/ a3b_cs(0)) => P2b ~> CS(0)
+LEMMA LP2b == [][Next]_vars /\ WF_vars(Next) => P2b ~> CS(0)
     \* Case pc[0] = a3a /\ ~flag[1]. Then P2b ~> CS(0). This is the same as LP1.
-    <1>1 [][Next]_vars /\ WF_vars(a3a_cs(0) \/ a3a_a3b(0) \/ a3b_cs(0)) => pc[0] = "a3a" /\ ~flag[1] /\ P2b ~> CS(0)
+    <1>1 [][Next]_vars /\ WF_vars(Next) => pc[0] = "a3a" /\ ~flag[1] /\ P2b ~> CS(0)
 \*        <2>6 QED
         BY P1a, LP1 DEF P1, WillEnterCSNext, Not, P2b
     \* Case pc[0] = a3a /\ flag[1]. Then P2b ~> P2c
-    <1>2 [][Next]_vars /\ WF_vars(a3a_cs(0) \/ a3a_a3b(0) \/ a3b_cs(0)) => pc[0] = "a3a" /\ flag[1] /\ P2b ~> P2c
+    <1>2 [][Next]_vars /\ WF_vars(Next) => pc[0] = "a3a" /\ flag[1] /\ P2b ~> P2c
         <2>6 QED
-    <1>3 [][Next]_vars /\ WF_vars(a3a_cs(0) \/ a3a_a3b(0) \/ a3b_cs(0)) => pc[0] = "a3a" /\ flag[1] /\ P2b ~> CS(0)
+    <1>3 [][Next]_vars /\ WF_vars(Next) => pc[0] = "a3a" /\ flag[1] /\ P2b ~> CS(0)
         BY <1>2, LP2c2, PTL
-    <1>4 [][Next]_vars /\ WF_vars(a3a_cs(0) \/ a3a_a3b(0) \/ a3b_cs(0)) => pc[0] = "a3a" /\ P2b ~> CS(0)
+    <1>4 [][Next]_vars /\ WF_vars(Next) => pc[0] = "a3a" /\ P2b ~> CS(0)
         BY <1>1, <1>3, PTL
     \* Case pc[0] = a3b. Then P2b ~> P2c ~> CS(0)
-    <1>5 [][Next]_vars /\ WF_vars(a3a_cs(0) \/ a3a_a3b(0) \/ a3b_cs(0)) => (pc[0] = "a3b" /\ P2b) ~> CS(0)
+    <1>5 [][Next]_vars /\ WF_vars(Next) => (pc[0] = "a3b" /\ P2b) ~> CS(0)
         <2>6 QED    
 \*    BY LP2c3, P1a, LP1, LP2c , PTL DEF P2b, Wait, P1, WillEnterCSNext, Not, Inv, TypeOK, I
     <1>6 QED
         BY <1>4, <1>5, PTL DEF Wait, P2b
 
-LEMMA LLP2 == 
-\*LEMMA L1P2c == [Next]_vars /\ pc[0] = "a3a" /\ P2b => (pc[0] = "a3a" /\ P2b)' \/ P2c'
-\*LEMMA L2P2c == <<Next /\ a3a_a3b(0)>>_vars /\ (pc[0] = "a3a" /\ P2b) => P2c'
-\*LEMMA L3P2c == pc[0] = "a3a" /\ P2b => ENABLED <<a3a_a3b(0)>>_vars
-\*LEMMA LP2c == [][Next]_vars /\ WF_vars(a3a_a3b(0)) => (pc[0] = "a3a" /\ P2b) ~> P2c
-\*BY L1P2c, L2P2c, L3P2c, PTL
+LEMMA LLP2 == [][Next]_vars /\ WF_vars(Next) => P2 ~> CS(0)
+    BY LP2, LP2a, LP2b, PTL
 
-\*LEMMA P2bP2c == ~(pc[0] = "a3a") /\ P2b = P2c
-\*BY PTL DEF P2b, P2c, Inv, TypeOK, I
-\*
-\*LEMMA LP2b == [][Next]_vars /\ WF_vars(a3b_cs(0)) => P2c ~> CS(0)
-\*BY LP1 DEF P1, P2b, A, WillEnterCSNext, P2c
+Q1 == Inv /\ Wait(0) /\ ~WillEnterCSNext(0)
+LEMMA 2_3_CASE_WAIT_1 == [][Next]_vars /\ WF_vars(Next) => Wait(1) /\ Q1 ~> CS(0)
 
-THEOREM FairSpec => Wait(0) ~> CS(0)
-<1>1 []Inv /\ [][Next]_vars /\ WF(0) /\ WF(1) => Wait(0) ~> CS(0)
-    <2>1 SUFFICES [][Next]_vars /\ WF(0) /\ WF(1) => (Inv /\ Wait(0)) ~> CS(0)
+LEMMA 2_3_CASE_CS_1 == [][Next]_vars /\ WF_vars(Next) => pc[1] = "cs" /\ Q1 ~> CS(0)
+
+THEOREM Spec /\ WF_vars(Next) => Wait(0) ~> CS(0)
+<1>1 []Inv /\ [][Next]_vars /\ WF_vars(Next) => Wait(0) ~> CS(0)
+    <2>1 SUFFICES [][Next]_vars /\ WF_vars(Next) => (Inv /\ Wait(0)) ~> CS(0)
         BY PTL
-    <2>2 SUFFICES [][Next]_vars /\ WF_vars(A(0)) => (Inv /\ Wait(0)) ~> CS(0)
-        BY DEF A, WF
-    <2>3 [][Next]_vars /\ WF_vars(A(0)) => (Inv /\ Wait(0) /\ WillEnterCSNext(0)) ~> CS(0)
-        <3>1 [][Next]_vars /\ WF_vars(A(0)) => P1 ~> CS(0)
-            BY LP1 
-        <3>2 [][Next]_vars /\ WF_vars(A(0)) => P2 ~> CS(0)
-            BY L1P2, L2P2, L3P2, PTL
-        <3>3 QED
-            BY <3>1, <3>2, PTL DEF P1, P2
-    <2>4 [][Next]_vars /\ WF_vars(A(0)) => (Inv /\ Wait(0) /\ ~WillEnterCSNext(0)) ~> CS(0)    
+    <2>2 [][Next]_vars /\ WF_vars(Next) => (Inv /\ Wait(0) /\ WillEnterCSNext(0)) ~> CS(0)
+        BY LP1, LLP2, PTL DEF P1, P2
+    <2>3 [][Next]_vars /\ WF_vars(Next) => (Inv /\ Wait(0) /\ ~WillEnterCSNext(0)) ~> CS(0)    
     <2>5 QED
-        BY <2>4, <2>3, PTL
+        BY <2>2, <2>3, PTL
 <1>2 QED   
-    BY Invariance, <1>1 DEF FairSpec, Init, Spec, Wait, CS, Next, proc, Inv, TypeOK, I, Not
+    BY Invariance, <1>1 DEF Init, Spec, Wait, CS, Next, proc, Inv, TypeOK, I, Not
     
 =============================================================================
 \* Modification History
-\* Last modified Tue Sep 15 23:22:52 AEST 2020 by raghavendra
+\* Last modified Tue Sep 15 23:46:56 AEST 2020 by raghavendra
 \* Created Mon Aug 31 12:09:32 AEST 2020 by raghavendra
