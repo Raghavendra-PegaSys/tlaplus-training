@@ -222,9 +222,10 @@ Q1 == Inv /\ Wait(0) /\ ~WillEnterCSNext(0)
 
 LEMMA 2_3_CASE_WAIT_1 == [][Next]_vars /\ WF_vars(Next) => (Wait(1) /\ Q1) ~> CS(0)
 
-LEMMA 2_3_NOT_WAIT == ~Wait(1) = (pc[1] = "cs" \/ pc[1] = "a4" \/ pc[1] = "a0" \/ pc[1] = "a1" \/ pc[1] = "a2")
-
-LEMMA 2_3_CASE_CS_1 == [][Next]_vars /\ WF_vars(Next) => ((pc[1] = "cs" \/ pc[1] = "a4" \/ pc[1] = "a0" \/ pc[1] = "a1" \/ pc[1] = "a2") /\ Q1) ~> CS(0)
+LEMMA 2_3_NOT_WAIT == TypeOK => (~Wait(1) <=> (pc[1] = "cs" \/ pc[1] = "a4" \/ pc[1] = "a0" \/ pc[1] = "a1" \/ pc[1] = "a2"))
+    BY DEF Wait, TypeOK
+    
+LEMMA 2_3_CASE_CS_1 == [][Next]_vars /\ WF_vars(Next) => ((pc[1] = "cs") /\ Q1) ~> CS(0)
 
 LEMMA 2_3_CASE_a4_1 == [][Next]_vars /\ WF_vars(Next) => (pc[1] = "a4" /\ Q1) ~> CS(0)
 
@@ -235,7 +236,7 @@ LEMMA 2_3_CASE_a1_1 == [][Next]_vars /\ WF_vars(Next) => (pc[1] = "a1" /\ Q1) ~>
 LEMMA 2_3_CASE_a2_1 == [][Next]_vars /\ WF_vars(Next) => (pc[1] = "a2" /\ Q1) ~> CS(0)
 
 LEMMA 2_3_CASE_WAIT_2 == [][Next]_vars /\ WF_vars(Next) => (~Wait(1) /\ Q1) ~> CS(0)
-    BY 2_3_CASE_CS_1,  2_3_NOT_WAIT, PTL DEF Wait, Q1, Inv, TypeOK
+    BY 2_3_CASE_CS_1, 2_3_CASE_a4_1, 2_3_CASE_a0_1, 2_3_CASE_a1_1, 2_3_CASE_a2_1, 2_3_NOT_WAIT, PTL DEF Wait, Q1, Inv, TypeOK
 
 THEOREM Spec /\ WF_vars(Next) => Wait(0) ~> CS(0)
 <1>1 []Inv /\ [][Next]_vars /\ WF_vars(Next) => Wait(0) ~> CS(0)
@@ -245,7 +246,6 @@ THEOREM Spec /\ WF_vars(Next) => Wait(0) ~> CS(0)
         BY LP1, LLP2, PTL DEF P1, P2
     <2>3 [][Next]_vars /\ WF_vars(Next) => Q1 ~> CS(0)
         BY 2_3_CASE_WAIT_1, 2_3_CASE_WAIT_2, PTL DEF Wait, Q1, Inv, TypeOK, Not
-\*        BY 2_3_CASE_WAIT_1, 2_3_CASE_CS_1, 2_3_CASE_a4_1, 2_3_CASE_a0_a1_a2_1, PTL DEF Wait, Q1, Inv, TypeOK, Not
     <2>5 QED
         BY <2>2, <2>3, PTL
 <1>2 QED   
@@ -253,5 +253,5 @@ THEOREM Spec /\ WF_vars(Next) => Wait(0) ~> CS(0)
     
 =============================================================================
 \* Modification History
-\* Last modified Wed Sep 16 00:14:54 AEST 2020 by raghavendra
+\* Last modified Thu Sep 17 11:22:16 AEST 2020 by raghavendra
 \* Created Mon Aug 31 12:09:32 AEST 2020 by raghavendra
