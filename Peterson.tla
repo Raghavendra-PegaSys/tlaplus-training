@@ -158,6 +158,20 @@ LEMMA Invariance == Spec => []Inv
 \* ENABLED action required here is A(0)
 P1 == Inv /\ Wait(0) /\ WillEnterCSNext(0) /\ ~(pc[1] = "a1")
 LEMMA L1P1 == [Next]_vars /\ P1 => P1' \/ CS(0)'
+    <1>1 Next /\ P1 => P1' \/ CS(0)'
+\*        BY Invariance DEF P1, Next, proc, a0, a1, a2, a3a_cs, a3b_cs, a3a_a3b, a3b_a3a, a4, CS, Wait, Not, Inv, TypeOK, I, WillEnterCSNext
+        <2>1 (a3a_cs(0) \/ a3b_cs(0)) /\ P1 => CS(0)'
+            BY DEF P1, CS, Wait, WillEnterCSNext, Inv, TypeOK, I, a3a_cs, a3b_cs, Not
+        <2>2 Next /\ ~(a3a_cs(0) \/ a3b_cs(0)) /\ P1 => P1'
+            <3>1 proc(1) /\ P1 => P1' 
+\*            BY DEF Next, P1, Wait, WillEnterCSNext, Inv, TypeOK, I, Not, proc, a0, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, a4
+        <2>6 QED 
+    <1>2 vars' = vars /\ P1 => P1'
+        BY DEF P1, Wait, WillEnterCSNext, Inv, TypeOK, I, vars
+\*    BY Invariance DEF P1, CS, Wait, Inv, TypeOK, I, Next, proc, a0, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, a4
+    <1>6 QED
+        BY <1>1, <1>2
+
 LEMMA L2P1 == <<Next>>_vars /\ P1 => CS(0)'
 LEMMA L3P1 == P1 => ENABLED <<Next>>_vars
 LEMMA LP1 == [][Next]_vars /\ WF_vars(Next) => P1 ~> CS(0)
@@ -199,7 +213,6 @@ LEMMA P1a == (pc[0] = "a3a") /\ ~flag[1] /\ P2b => P1
 LEMMA LP2b == [][Next]_vars /\ WF_vars(Next) => P2b ~> CS(0)
     \* Case pc[0] = a3a /\ ~flag[1]. Then P2b ~> CS(0). This is the same as LP1.
     <1>1 [][Next]_vars /\ WF_vars(Next) => pc[0] = "a3a" /\ ~flag[1] /\ P2b ~> CS(0)
-\*        <2>6 QED
         BY P1a, LP1 DEF P1, WillEnterCSNext, Not, P2b
     \* Case pc[0] = a3a /\ flag[1]. Then P2b ~> P2c
     <1>2 [][Next]_vars /\ WF_vars(Next) => pc[0] = "a3a" /\ flag[1] /\ P2b ~> P2c
@@ -220,25 +233,51 @@ LEMMA LLP2 == [][Next]_vars /\ WF_vars(Next) => P2 ~> CS(0)
 
 Q1 == Inv /\ Wait(0) /\ ~WillEnterCSNext(0)
 
-LEMMA 2_3_CASE_WAIT_1 == [][Next]_vars /\ WF_vars(Next) => (Wait(1) /\ Q1) ~> CS(0)
-
 LEMMA 2_3_NOT_WAIT == TypeOK => (~Wait(1) <=> (pc[1] = "cs" \/ pc[1] = "a4" \/ pc[1] = "a0" \/ pc[1] = "a1" \/ pc[1] = "a2"))
     BY DEF Wait, TypeOK
     
-LEMMA 2_3_CASE_CS_1 == [][Next]_vars /\ WF_vars(Next) => ((pc[1] = "cs") /\ Q1) ~> CS(0)
-
 LEMMA 2_3_CASE_a4_1 == [][Next]_vars /\ WF_vars(Next) => (pc[1] = "a4" /\ Q1) ~> CS(0)
+    <1>1 [][Next]_vars /\ WF_vars(Next) => (pc[1] = "a4" /\ Q1) ~> P1
+        <2>6 QED
+    <1>2 QED
+        BY <1>1, LP1, PTL    
 
-LEMMA 2_3_CASE_a0_1 == [][Next]_vars /\ WF_vars(Next) => (pc[1] = "a0" /\ Q1) ~> CS(0)
+LEMMA 2_3_CASE_CS_1 == [][Next]_vars /\ WF_vars(Next) => (pc[1] = "cs" /\ Q1) ~> CS(0)
+    <1>1 [][Next]_vars /\ WF_vars(Next) => (pc[1] = "cs" /\ Q1) ~> (pc[1] = "a4" /\ Q1)
+        <2>6 QED
+    <1>2 QED
+        BY <1>1, 2_3_CASE_a4_1, PTL
 
-LEMMA 2_3_CASE_a1_1 == [][Next]_vars /\ WF_vars(Next) => (pc[1] = "a1" /\ Q1) ~> CS(0)
+LEMMA 2_3_CASE_WAIT_1 == [][Next]_vars /\ WF_vars(Next) => (Wait(1) /\ Q1) ~> CS(0)
+    <1>1 [][Next]_vars /\ WF_vars(Next) => (Wait(1) /\ Q1) ~> (pc[1] = "cs" /\ Q1)
+        <2>6 QED
+    <1>2 QED
+        BY <1>1, 2_3_CASE_CS_1, PTL
 
 LEMMA 2_3_CASE_a2_1 == [][Next]_vars /\ WF_vars(Next) => (pc[1] = "a2" /\ Q1) ~> CS(0)
+    <1>1 [][Next]_vars /\ WF_vars(Next) => (pc[1] = "a2" /\ Q1) ~> P1
+        <2>6 QED
+    <1>2 QED
+        BY <1>1, LP1, PTL
+
+LEMMA 2_3_CASE_a1_1 == [][Next]_vars /\ WF_vars(Next) => (pc[1] = "a1" /\ Q1) ~> CS(0)
+    <1>1 [][Next]_vars /\ WF_vars(Next) => (pc[1] = "a1" /\ Q1) ~> (pc[1] = "a2" /\ Q1)
+        <2>6 QED
+    <1>2 QED
+        BY <1>1, 2_3_CASE_a2_1, PTL
+
+LEMMA 2_3_CASE_a0_1 == [][Next]_vars /\ WF_vars(Next) => (pc[1] = "a0" /\ Q1) ~> CS(0)
+    <1>1 [][Next]_vars /\ WF_vars(Next) => (pc[1] = "a0" /\ Q1) ~> (pc[1] = "a1" /\ Q1)
+        <2>6 QED
+    <1>2 QED
+        BY <1>1, 2_3_CASE_a1_1, PTL
+
+
 
 LEMMA 2_3_CASE_WAIT_2 == [][Next]_vars /\ WF_vars(Next) => (~Wait(1) /\ Q1) ~> CS(0)
     BY 2_3_CASE_CS_1, 2_3_CASE_a4_1, 2_3_CASE_a0_1, 2_3_CASE_a1_1, 2_3_CASE_a2_1, 2_3_NOT_WAIT, PTL DEF Wait, Q1, Inv, TypeOK
 
-THEOREM Spec /\ WF_vars(Next) => Wait(0) ~> CS(0)
+THEOREM Liveness == Spec /\ WF_vars(Next) => Wait(0) ~> CS(0)
 <1>1 []Inv /\ [][Next]_vars /\ WF_vars(Next) => Wait(0) ~> CS(0)
     <2>1 SUFFICES [][Next]_vars /\ WF_vars(Next) => (Inv /\ Wait(0)) ~> CS(0)
         BY PTL
@@ -247,11 +286,11 @@ THEOREM Spec /\ WF_vars(Next) => Wait(0) ~> CS(0)
     <2>3 [][Next]_vars /\ WF_vars(Next) => Q1 ~> CS(0)
         BY 2_3_CASE_WAIT_1, 2_3_CASE_WAIT_2, PTL DEF Wait, Q1, Inv, TypeOK, Not
     <2>5 QED
-        BY <2>2, <2>3, PTL
+        BY <2>2, <2>3, PTL DEF Q1
 <1>2 QED   
     BY Invariance, <1>1 DEF Init, Spec, Wait, CS, Next, proc, Inv, TypeOK, I, Not
     
 =============================================================================
 \* Modification History
-\* Last modified Thu Sep 17 11:22:16 AEST 2020 by raghavendra
+\* Last modified Thu Sep 17 14:46:43 AEST 2020 by raghavendra
 \* Created Mon Aug 31 12:09:32 AEST 2020 by raghavendra
