@@ -83,8 +83,7 @@ I == \A i \in {0,1}:
 
 Inv == TypeOK /\ I
 
-\* For any valid, MutualExclusion is satisfied in all states. 
-THEOREM Spec => []MutualExclusion
+LEMMA Invariance == Spec => []Inv
 <1>1 Init => Inv
     BY DEF Init, Inv, TypeOK, I
 <1>2 Inv /\ [Next]_vars => Inv'
@@ -114,6 +113,13 @@ THEOREM Spec => []MutualExclusion
     \* []Inv => []MutualExclusion from Inv => MutualExclusion
     \* Init /\ [][Next]_vars => []Inv from Init /\ [Next]_vars => Inv
     BY <1>1, <1>2, <1>3, PTL DEF Spec, MutualExclusion, Inv, TypeOK, I, Init, Next, vars, Not
+    
+\* For any valid, MutualExclusion is satisfied in all states. 
+THEOREM Spec => []MutualExclusion
+    <1>1 Inv => MutualExclusion
+        BY DEF Inv, TypeOK, I, Not, MutualExclusion
+    <1>2 QED
+        BY <1>1, Invariance, PTL DEF MutualExclusion, Inv, TypeOK, I, Not
 
 \* Liveness
     
@@ -123,8 +129,6 @@ A(i) == a3a_cs(i) \/ a3b_cs(i)
 WillEnterCSNext(i) == 
     /\ (pc[i] = "a3a" => ~flag[Not(i)])
     /\ (pc[i] = "a3b" => turn = i)     
-
-LEMMA Invariance == Spec => []Inv
 
 \* ENABLED action required here is A(0)
 \*Case 1.1
@@ -532,5 +536,5 @@ THEOREM Liveness == Spec /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => Wait(0) ~> C
     
 =============================================================================
 \* Modification History
-\* Last modified Mon Sep 21 03:27:54 AEST 2020 by raghavendra
+\* Last modified Mon Sep 21 03:40:06 AEST 2020 by raghavendra
 \* Created Mon Aug 31 12:09:32 AEST 2020 by raghavendra
