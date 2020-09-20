@@ -167,137 +167,189 @@ LEMMA LP1 == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => P1 ~> CS(0
     BY L1P1, L2P1, L3P1, PTL
 
 P2 == Inv /\ Wait(0) /\ WillEnterCSNext(0) /\ pc[1] = "a1"
-P2a == Inv /\ Wait(0) /\ pc[1] = "a2"  /\ flag[1]
-P2b == Inv /\ Wait(0) /\ pc[1] = "a3a" /\ turn = 0
-P2c == Inv /\ pc[0] = "a3b" /\ turn = 0 /\ Wait(1)
-        
-\* ENABLED action required here is a1(1)
-LEMMA L1P2 == [Next]_vars /\ P2 => P2' \/ P2a' \/ CS(0)'
-    <1>1 Next /\ P2 => CS(0)' \/ P2a'
-        <2>1 proc(1) /\ P2 => P2a'
-            BY DEF proc, P2, a1, P2a, Inv, TypeOK, I, Wait, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4, Not
-        <2>2 proc(0) /\ P2 => CS(0)'
-            BY DEF proc, P2, a3a_cs, a3b_cs, CS, Wait, WillEnterCSNext, Inv, TypeOK, I, a1, a2, a3a_a3b, a3b_a3a, a4, cs, Not
-        <2>6 QED
-            BY <2>1, <2>2 DEF CS, Next
-    <1>2 vars' = vars /\ P2 => P2'
-        BY DEF vars, P2, Inv, Wait, WillEnterCSNext, TypeOK, I        
-    <1>6 QED
-        BY <1>1, <1>2
-        
-LEMMA L2P2 == <<Next /\ proc(0)>>_vars /\ P2 => CS(0)'
-    <1>1 SUFFICES <<a3a_cs(0) \/ a3b_cs(0)>>_vars /\ P2 => CS(0)'
-        BY DEF Next, proc, a3a_cs, a3b_cs, Not, CS, P2, Wait, WillEnterCSNext, Not, vars, Inv, TypeOK, I, a1, a2, a3a_a3b, a3b_a3a, cs, a4 
-    <1>2 pc[0] = "a3a" /\ a3a_cs(0) /\ P2 => CS(0)'
-        BY DEF a3a_cs, CS, P2, Wait, WillEnterCSNext, Not, Inv, TypeOK, I
-    <1>3 pc[0] = "a3b" /\ a3b_cs(0) /\ P2 => CS(0)'
-        BY DEF a3b_cs, CS, P2, Wait, WillEnterCSNext, Not, Inv, TypeOK, I
-    <1>6 QED
-        BY <1>2, <1>3 DEF P2, Wait, WillEnterCSNext, Inv, TypeOK, I, a3a_cs, a3b_cs
-    
-LEMMA L5P2 == <<Next /\ proc(1)>>_vars /\ P2 => P2a'
-    <1>1 SUFFICES <<a1(1)>>_vars /\ P2 => P2a'
-        BY DEF Next, proc, a3a_cs, a3b_cs, Not, CS, P2, Wait, WillEnterCSNext, Not, vars, Inv, TypeOK, I, a1, a2, a3a_a3b, a3b_a3a, cs, a4
-    <1>2 a1(1) /\ P2 => P2a'
-        BY DEF a1, P2, P2a, Inv, TypeOK, I, Not, Wait, WillEnterCSNext 
-    <1>6 QED
-        BY <1>2 DEF vars
-
-LEMMA L3P2 == P2 => ENABLED <<proc(0)>>_vars 
-    PROOF OMITTED
-    
-LEMMA L4P2 == P2 => ENABLED <<proc(1)>>_vars 
-    PROOF OMITTED
-
-LEMMA LP2 == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => P2 ~> (P2a \/ CS(0))
-    BY L1P2, L2P2, L5P2, L3P2, L4P2, PTL DEF Next 
-
-LEMMA M2P2a == <<Next /\ proc(0)>>_vars /\ P2a => P2a' \/ CS(0)'
-    <1>1 a3a_a3b(0) /\ P2a => P2a'
-        BY DEF P2a, Wait, a3a_a3b, Inv, TypeOK, I, Not
-    <1>2 turn = 0 /\ a3b_cs(0) /\ P2a => CS(0)'
-        BY DEF P2a, Wait, CS, a3b_cs, Inv, TypeOK, I 
-    <1>3 turn = 1 /\ a3b_a3a(0) /\ P2a => P2a'
-        BY DEF P2a, Wait, a3b_a3a, Inv, TypeOK, I 
-    <1>6 QED
-        BY <1>1, <1>2, <1>3 DEF proc, P2a, Inv, TypeOK, I, Not, Wait, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4
-
-LEMMA L2P2a == <<Next /\ proc(1)>>_vars /\ P2a => P2b'
-    <1>1 a2(1) /\ P2a => P2b'
-        BY DEF a2, P2a, P2b, Inv, TypeOK, I, Not, Wait
-    <1>6 QED    
-        BY <1>1 DEF proc, P2a, P2b, Wait, Not, Inv, TypeOK, I, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4
-
-\* ENABLED action required here is a2(1)
-LEMMA L1P2a == [Next]_vars /\ P2a => P2a' \/ P2b' \/ CS(0)'
-    <1>1 vars' = vars /\ P2a => P2a'
-        BY DEF vars, P2a, Wait, Inv, TypeOK, I, WillEnterCSNext
-    <1>2 proc(0) /\ P2a => P2a' \/ CS(0)'
-        BY M2P2a DEF Next, vars, proc, P2a, CS, Inv, TypeOK, I, Not, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4
-    <1>3 proc(1) /\ P2a => P2b'
-        BY L2P2a DEF Next, proc, P2a, P2b, Wait, Not, Inv, TypeOK, I, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4
-    <1>6 QED
-        BY <1>1, <1>2, <1>3 DEF Next
-        
-LEMMA L3P2a == P2a => ENABLED <<proc(1)>>_vars
-    PROOF OMITTED
-    
-LEMMA M3P2a == P2a => ENABLED <<proc(0)>>_vars
-    PROOF OMITTED
-
-LEMMA LP2a == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => P2a ~> (P2b \/ CS(0))
-    BY L1P2a, L2P2a, L3P2a, M2P2a, M3P2a, PTL DEF Next, proc
-
-\* ENABLED action required here is a3b_cs(0)
-LEMMA LP2c1 == [][Next]_vars /\ WF_vars(proc(0)) => (pc[0] = "a3b" /\ P2b) ~> P2c
-
-\* ENABLED action required here is a3a_cs(0) \/ a3a_a3b(0) \/ a3b_cs(0)
-LEMMA LP2c2 == [][Next]_vars /\ WF_vars(proc(0)) => P2c ~> CS(0)
-
-\* Case pc[0] = a3b. Then P2b ~> P2c ~> CS(0)
-LEMMA LP2c == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => (pc[0] = "a3b" /\ P2b) ~> CS(0)
-    BY LP2c1, LP2c2, PTL
-
-\* Case pc[0] = a3a /\ flag[1]. Then P2b ~> P2c
-LEMMA LP2c3 == [][Next]_vars /\ WF_vars(proc(0)) => (pc[0] = "a3a" /\ flag[1] /\ P2b) ~> P2c
-
-LEMMA LP2c4 == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => (pc[0] = "a3b" /\ P2b) ~> P2c
-
-\* Case pc[0] = a3a /\ ~flag[1]. Then P2b ~> CS(0). This is the same as LP1.
-LEMMA P1a == (pc[0] = "a3a") /\ ~flag[1] /\ P2b => P1
-    BY DEF P1, P2b, WillEnterCSNext, Not
-
-LEMMA LP2b == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => P2b ~> CS(0)
-    \* Case pc[0] = a3a /\ ~flag[1]. Then P2b ~> CS(0). This is the same as LP1.
-    <1>1 [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => pc[0] = "a3a" /\ ~flag[1] /\ P2b ~> CS(0)
-        BY P1a, LP1, PTL
-    \* Case pc[0] = a3a /\ flag[1]. Then P2b ~> P2c
-    <1>2 [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => pc[0] = "a3a" /\ flag[1] /\ P2b ~> P2c
-        BY LP2c3
-    <1>3 [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => pc[0] = "a3a" /\ flag[1] /\ P2b ~> CS(0)
-        BY <1>2, LP2c2, PTL
-    <1>4 [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => pc[0] = "a3a" /\ P2b ~> CS(0)
-        BY <1>1, <1>3, PTL
-    \* Case pc[0] = a3b. Then P2b ~> P2c ~> CS(0)
-    <1>5 [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => (pc[0] = "a3b" /\ P2b) ~> CS(0)
-        BY LP2c2, LP2c4, PTL
-    <1>6 QED
-        BY <1>4, <1>5, PTL DEF Wait, P2b
-
-LEMMA LLP2 == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => P2 ~> CS(0)
-    BY LP2, LP2a, LP2b, PTL
+\*P2a == Inv /\ Wait(0) /\ pc[1] = "a2"  /\ flag[1]
+\*P2b == Inv /\ Wait(0) /\ pc[1] = "a3a" /\ turn = 0
+\*P2c == Inv /\ pc[0] = "a3b" /\ turn = 0 /\ Wait(1)
+\*        
+\*\* ENABLED action required here is a1(1)
+\*LEMMA L1P2 == [Next]_vars /\ P2 => P2' \/ P2a' \/ CS(0)'
+\*    <1>1 Next /\ P2 => CS(0)' \/ P2a'
+\*        <2>1 proc(1) /\ P2 => P2a'
+\*            BY DEF proc, P2, a1, P2a, Inv, TypeOK, I, Wait, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4, Not
+\*        <2>2 proc(0) /\ P2 => CS(0)'
+\*            BY DEF proc, P2, a3a_cs, a3b_cs, CS, Wait, WillEnterCSNext, Inv, TypeOK, I, a1, a2, a3a_a3b, a3b_a3a, a4, cs, Not
+\*        <2>6 QED
+\*            BY <2>1, <2>2 DEF CS, Next
+\*    <1>2 vars' = vars /\ P2 => P2'
+\*        BY DEF vars, P2, Inv, Wait, WillEnterCSNext, TypeOK, I        
+\*    <1>6 QED
+\*        BY <1>1, <1>2
+\*        
+\*LEMMA L2P2 == <<Next /\ proc(0)>>_vars /\ P2 => CS(0)'
+\*    <1>1 SUFFICES <<a3a_cs(0) \/ a3b_cs(0)>>_vars /\ P2 => CS(0)'
+\*        BY DEF Next, proc, a3a_cs, a3b_cs, Not, CS, P2, Wait, WillEnterCSNext, Not, vars, Inv, TypeOK, I, a1, a2, a3a_a3b, a3b_a3a, cs, a4 
+\*    <1>2 pc[0] = "a3a" /\ a3a_cs(0) /\ P2 => CS(0)'
+\*        BY DEF a3a_cs, CS, P2, Wait, WillEnterCSNext, Not, Inv, TypeOK, I
+\*    <1>3 pc[0] = "a3b" /\ a3b_cs(0) /\ P2 => CS(0)'
+\*        BY DEF a3b_cs, CS, P2, Wait, WillEnterCSNext, Not, Inv, TypeOK, I
+\*    <1>6 QED
+\*        BY <1>2, <1>3 DEF P2, Wait, WillEnterCSNext, Inv, TypeOK, I, a3a_cs, a3b_cs
+\*    
+\*LEMMA L5P2 == <<Next /\ proc(1)>>_vars /\ P2 => P2a'
+\*    <1>1 SUFFICES <<a1(1)>>_vars /\ P2 => P2a'
+\*        BY DEF Next, proc, a3a_cs, a3b_cs, Not, CS, P2, Wait, WillEnterCSNext, Not, vars, Inv, TypeOK, I, a1, a2, a3a_a3b, a3b_a3a, cs, a4
+\*    <1>2 a1(1) /\ P2 => P2a'
+\*        BY DEF a1, P2, P2a, Inv, TypeOK, I, Not, Wait, WillEnterCSNext 
+\*    <1>6 QED
+\*        BY <1>2 DEF vars
+\*
+\*LEMMA L3P2 == P2 => ENABLED <<proc(0)>>_vars 
+\*    PROOF OMITTED
+\*    
+\*LEMMA L4P2 == P2 => ENABLED <<proc(1)>>_vars 
+\*    PROOF OMITTED
+\*
+\*LEMMA LP2 == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => P2 ~> (P2a \/ CS(0))
+\*    BY L1P2, L2P2, L5P2, L3P2, L4P2, PTL DEF Next 
+\*
+\*LEMMA M2P2a == <<Next /\ proc(0)>>_vars /\ P2a => P2a' \/ CS(0)'
+\*    <1>1 a3a_a3b(0) /\ P2a => P2a'
+\*        BY DEF P2a, Wait, a3a_a3b, Inv, TypeOK, I, Not
+\*    <1>2 turn = 0 /\ a3b_cs(0) /\ P2a => CS(0)'
+\*        BY DEF P2a, Wait, CS, a3b_cs, Inv, TypeOK, I 
+\*    <1>3 turn = 1 /\ a3b_a3a(0) /\ P2a => P2a'
+\*        BY DEF P2a, Wait, a3b_a3a, Inv, TypeOK, I 
+\*    <1>6 QED
+\*        BY <1>1, <1>2, <1>3 DEF proc, P2a, Inv, TypeOK, I, Not, Wait, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4
+\*
+\*LEMMA L2P2a == <<Next /\ proc(1)>>_vars /\ P2a => P2b'
+\*    <1>1 a2(1) /\ P2a => P2b'
+\*        BY DEF a2, P2a, P2b, Inv, TypeOK, I, Not, Wait
+\*    <1>6 QED    
+\*        BY <1>1 DEF proc, P2a, P2b, Wait, Not, Inv, TypeOK, I, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4
+\*
+\*\* ENABLED action required here is a2(1)
+\*LEMMA L1P2a == [Next]_vars /\ P2a => P2a' \/ P2b' \/ CS(0)'
+\*    <1>1 vars' = vars /\ P2a => P2a'
+\*        BY DEF vars, P2a, Wait, Inv, TypeOK, I, WillEnterCSNext
+\*    <1>2 proc(0) /\ P2a => P2a' \/ CS(0)'
+\*        BY M2P2a DEF Next, vars, proc, P2a, CS, Inv, TypeOK, I, Not, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4
+\*    <1>3 proc(1) /\ P2a => P2b'
+\*        BY L2P2a DEF Next, proc, P2a, P2b, Wait, Not, Inv, TypeOK, I, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4
+\*    <1>6 QED
+\*        BY <1>1, <1>2, <1>3 DEF Next
+\*        
+\*LEMMA L3P2a == P2a => ENABLED <<proc(1)>>_vars
+\*    PROOF OMITTED
+\*    
+\*LEMMA M3P2a == P2a => ENABLED <<proc(0)>>_vars
+\*    PROOF OMITTED
+\*
+\*LEMMA LP2a == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => P2a ~> (P2b \/ CS(0))
+\*    BY L1P2a, L2P2a, L3P2a, M2P2a, M3P2a, PTL DEF Next, proc
+\*
+\*LEMMA LP2c1 == (pc[0] = "a3b" /\ P2b) => P2c
+\*    BY DEF P2b, P2c, Inv, TypeOK, I, Not, Wait
+\*    
+\*LEMMA LP2c2_a == [Next]_vars /\ P2c => P2c' \/ CS(0)'
+\*    <1>1 vars' = vars /\ P2c => P2c'
+\*        BY DEF vars, P2c, Inv, Wait, TypeOK, I, Not
+\*    <1>2 proc(0) /\ P2c => CS(0)'
+\*        BY DEF proc, P2c, Inv, Wait, TypeOK, I, Not, CS, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4, vars
+\*    <1>3 proc(1) /\ P2c => P2c'
+\*        BY DEF proc, P2c, Inv, Wait, TypeOK, I, Not, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4, vars
+\*    <1>4 QED
+\*        BY <1>1, <1>2, <1>3 DEF Next
+\*        
+\*LEMMA LP2c2_b == <<Next /\ proc(0)>>_vars /\ P2c => CS(0)'
+\*        BY DEF proc, P2c, Inv, Wait, TypeOK, I, Not, CS, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4, vars
+\*        
+\*LEMMA LP2c2_c == P2c => ENABLED <<proc(0)>>_vars
+\*    PROOF OMITTED
+\*    
+\*\* ENABLED action required here is a3a_cs(0) \/ a3a_a3b(0) \/ a3b_cs(0)
+\*LEMMA LP2c2 == [][Next]_vars /\ WF_vars(proc(0)) => P2c ~> CS(0)
+\*    BY LP2c2_a, LP2c2_b, LP2c2_c, PTL
+\*
+\*\* Case pc[0] = a3b. Then P2b ~> P2c ~> CS(0)
+\*LEMMA LP2c == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => (pc[0] = "a3b" /\ P2b) ~> CS(0)
+\*    BY LP2c1, LP2c2, PTL
+\*
+\*\* Case pc[0] = a3a /\ flag[1]. Then P2b ~> P2c
+\*LEMMA LP2b_1_2_a == [Next]_vars /\ (pc[0] = "a3a" /\ flag[1] /\ P2b) => (pc[0] = "a3a" /\ flag[1] /\ P2b)' \/ P2c'
+\*    <1>1 vars' = vars /\ (pc[0] = "a3a" /\ flag[1] /\ P2b) => (pc[0] = "a3a" /\ flag[1] /\ P2b)'
+\*        BY DEF vars, P2b, Inv, Wait, TypeOK, I, Not
+\*    <1>2 proc(0) /\ (pc[0] = "a3a" /\ flag[1] /\ P2b) => P2c'
+\*        BY DEF proc, P2c, P2b, Inv, Wait, TypeOK, I, Not, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4, vars
+\*    <1>3 proc(1) /\ (pc[0] = "a3a" /\ flag[1] /\ P2b) => P2c'
+\*        BY DEF proc, P2c, P2b, Inv, Wait, TypeOK, I, Not, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4, vars
+\*    <1>4 QED
+\*        
+\*LEMMA LP2c3 == [][Next]_vars /\ WF_vars(proc(0)) => (pc[0] = "a3a" /\ flag[1] /\ P2b) ~> P2c
+\*
+\*LEMMA LP2c4 == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => (pc[0] = "a3b" /\ P2b) ~> P2c
+\*
+\*\* Case pc[0] = a3a /\ ~flag[1]. Then P2b ~> CS(0). This is the same as LP1.
+\*LEMMA P1a == (pc[0] = "a3a") /\ ~flag[1] /\ P2b => P1
+\*    BY DEF P1, P2b, WillEnterCSNext, Not
+\*
+\*LEMMA LP2b == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => P2b ~> CS(0)
+\*    \* Case pc[0] = a3a /\ ~flag[1]. Then P2b ~> CS(0). This is the same as LP1.
+\*    <1>1 [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => pc[0] = "a3a" /\ ~flag[1] /\ P2b ~> CS(0)
+\*        BY P1a, LP1, PTL
+\*    \* Case pc[0] = a3a /\ flag[1]. Then P2b ~> P2c
+\*    <1>2 [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => pc[0] = "a3a" /\ flag[1] /\ P2b ~> P2c
+\*        BY LP2c3
+\*    <1>3 [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => pc[0] = "a3a" /\ flag[1] /\ P2b ~> CS(0)
+\*        BY <1>2, LP2c2, PTL
+\*    <1>4 [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => pc[0] = "a3a" /\ P2b ~> CS(0)
+\*        BY <1>1, <1>3, PTL
+\*    \* Case pc[0] = a3b. Then P2b ~> P2c ~> CS(0)
+\*    <1>5 [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => (pc[0] = "a3b" /\ P2b) ~> CS(0)
+\*        BY LP2c2, LP2c4, PTL
+\*    <1>6 QED
+\*        BY <1>4, <1>5, PTL DEF Wait, P2b
 
 Q1 == Inv /\ Wait(0) /\ ~WillEnterCSNext(0)
+        
+LEMMA H1 == (turn = 0 /\ Wait(1) /\ Q1) => pc[0] = "a3a"
+    BY DEF Q1, Inv, TypeOK, I, Wait, WillEnterCSNext, Not
 
-LEMMA 2_3_NOT_WAIT == TypeOK => (~Wait(1) <=> (pc[1] = "cs" \/ pc[1] = "a4" \/ pc[1] = "a1" \/ pc[1] = "a2"))
-    BY DEF Wait, TypeOK
+LEMMA H2 == Inv /\ turn = 0 /\ Wait(1) /\ pc[0] = "a3b" => P1
+    BY DEF Inv, Wait, TypeOK, I, Not, P1, WillEnterCSNext
+
+LEMMA P2_3_1_3_a == [Next]_vars /\ (pc[0] = "a3a" /\ Wait(1) /\ Inv /\ turn = 0) => (pc[0] = "a3a" /\ Wait(1) /\ Inv /\ turn = 0)' \/  (pc[0] = "a3b" /\ Wait(1) /\ Inv /\ turn = 0)'
+    <1>1 vars' = vars /\ (pc[0] = "a3a" /\ Wait(1) /\ Inv /\ turn = 0) => (pc[0] = "a3a" /\ Wait(1) /\ Inv /\ turn = 0)'
+        BY DEF  Q1, Wait, WillEnterCSNext, Inv, TypeOK, I, Not, vars
+    <1>2 proc(0) /\ (pc[0] = "a3a" /\ Wait(1) /\ Inv /\ turn = 0) => (pc[0] = "a3b" /\ Wait(1) /\ Inv /\ turn = 0)'
+        BY DEF Wait, Q1, WillEnterCSNext, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs
+    <1>3 proc(1) /\ (pc[0] = "a3a" /\ Wait(1) /\ Inv /\ turn = 0) => (pc[0] = "a3a" /\ Wait(1) /\ Inv /\ turn = 0)' 
+        BY DEF Wait, Q1, WillEnterCSNext, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs
+    <1>6 QED
+        BY <1>1, <1>2, <1>3 DEF Next     
+
+LEMMA P2_3_1_3_b == <<Next /\ proc(0)>>_vars /\ (pc[0] = "a3a" /\ Wait(1) /\ Inv /\ turn = 0) => (pc[0] = "a3b" /\ Wait(1) /\ Inv /\ turn = 0)'
+        BY DEF Wait, Q1, WillEnterCSNext, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs
+
+LEMMA P2_3_1_3_c == (pc[0] = "a3a" /\ Wait(1) /\ Inv /\ turn = 0) => ENABLED <<proc(0)>>_vars
+    PROOF OMITTED
+
+LEMMA 2_3_1_2_a == [Next]_vars /\ (turn = 1 /\ pc[1] = "a2" /\ Q1) => (turn = 1 /\ pc[1] = "a2" /\ Q1)' \/  (Wait(1) /\ Inv /\ Wait(0) /\ turn = 0)'
+    <1>1 vars' = vars /\ (turn = 1 /\ pc[1] = "a2" /\ Q1) => (turn = 1 /\ pc[1] = "a2" /\ Q1)'
+        BY DEF  Q1, Wait, WillEnterCSNext, Inv, TypeOK, I, Not, vars
+    <1>2 proc(0) /\ (turn = 1 /\ pc[1] = "a2" /\ Q1) => (turn = 1 /\ pc[1] = "a2" /\ Q1)'    
+        BY DEF Wait, Q1, WillEnterCSNext, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs
+    <1>3 proc(1) /\ (turn = 1 /\ pc[1] = "a2" /\ Q1) => (Wait(1) /\ Inv /\ Wait(0) /\ turn = 0)'
+        BY DEF Wait, Q1, WillEnterCSNext, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs
+    <1>6 QED
+        BY <1>1, <1>2, <1>3 DEF Next
     
-LEMMA 2_3_CASE_a4_1 == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => (pc[1] = "a4" /\ Q1) ~> CS(0)
-    <1>1 [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => (pc[1] = "a4" /\ Q1) ~> P1
-        <2>6 QED
-    <1>2 QED
-        BY <1>1, LP1, PTL    
+LEMMA 2_3_1_2_b == <<Next /\ proc(1)>>_vars /\ (turn = 1 /\ pc[1] = "a2" /\ Q1) => (Wait(1) /\ Inv /\ Wait(0) /\ turn = 0)'
+    BY DEF Wait, Q1, WillEnterCSNext, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs
 
+LEMMA 2_3_1_2_c == (turn = 1 /\ pc[1] = "a2" /\ Q1) => ENABLED <<proc(1)>>_vars
+    PROOF OMITTED
+        
 LEMMA P1_cs_a4_a == [Next]_vars /\ (pc[1] = "cs" /\ Q1) => (pc[1] = "cs" /\ Q1)' \/ (pc[1] = "a4" /\ Q1)'
     <1>1 vars' = vars /\ pc[1] = "cs" /\ Q1 => (pc[1] = "cs" /\ Q1)'
         BY DEF vars, Q1, Inv, TypeOK, I, Wait, WillEnterCSNext
@@ -313,16 +365,7 @@ LEMMA P1_cs_a4_b == <<Next /\ proc(1)>>_vars /\ (pc[1] = "cs" /\ Q1) => (pc[1] =
 
 LEMMA P1_cs_a4_c == (pc[1] = "cs" /\ Q1) => ENABLED <<proc(1)>>_vars
     PROOF OMITTED
-
-LEMMA 2_3_CASE_CS_1 == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => (pc[1] = "cs" /\ Q1) ~> CS(0)
-    <1>1 [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => (pc[1] = "cs" /\ Q1) ~> (pc[1] = "a4" /\ Q1)
-        BY P1_cs_a4_a, P1_cs_a4_b, P1_cs_a4_c, PTL DEF Next, proc
-    <1>2 QED
-        BY <1>1, 2_3_CASE_a4_1, PTL
-        
-LEMMA H1 == (turn = 0 /\ Wait(1) /\ Q1) => pc[0] = "a3a"
-    BY DEF Q1, Inv, TypeOK, I, Wait, WillEnterCSNext, Not
-
+            
 LEMMA P0_a3a_a3b_a == [Next]_vars /\ (turn = 0 /\ Wait(1) /\ Q1) => (turn = 0 /\ Wait(1) /\ Q1)' \/ (turn = 0 /\ pc[0] = "a3b" /\ Wait(1) /\ Inv)'       
     <1>1 vars' = vars /\ (turn = 0 /\ Wait(1) /\ Q1) => (turn = 0 /\ Wait(1) /\ Q1)'
         BY DEF vars, Q1, Wait, WillEnterCSNext, Inv, TypeOK, I, Not
@@ -338,6 +381,7 @@ LEMMA P0_a3a_a3b_b == <<Next /\ proc(0)>>_vars /\ (turn = 0 /\ Wait(1) /\ Q1) =>
 
 LEMMA P0_a3a_a3b_c == (turn = 0 /\ Wait(1) /\ Q1) => ENABLED <<proc(0)>>_vars
     PROOF OMITTED 
+
     
 LEMMA Appeal_P1 == (turn = 0 /\ pc[0] = "a3b" /\ Wait(1) /\ Inv) => P1
     BY DEF Wait, WillEnterCSNext, P1, Inv, TypeOK, I, Not
@@ -392,42 +436,7 @@ LEMMA 2_3_CASE_WAIT_1 == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) =
         BY DEF Q1, Inv, TypeOK
     <1>8 QED
         BY <1>2, <1>6, <1>7, PTL
-
-LEMMA H2 == Inv /\ turn = 0 /\ Wait(1) /\ pc[0] = "a3b" => P1
-    BY DEF Inv, Wait, TypeOK, I, Not, P1, WillEnterCSNext
-
-LEMMA P2_3_1_3_a == [Next]_vars /\ (pc[0] = "a3a" /\ Wait(1) /\ Inv /\ turn = 0) => (pc[0] = "a3a" /\ Wait(1) /\ Inv /\ turn = 0)' \/  (pc[0] = "a3b" /\ Wait(1) /\ Inv /\ turn = 0)'
-    <1>1 vars' = vars /\ (pc[0] = "a3a" /\ Wait(1) /\ Inv /\ turn = 0) => (pc[0] = "a3a" /\ Wait(1) /\ Inv /\ turn = 0)'
-        BY DEF  Q1, Wait, WillEnterCSNext, Inv, TypeOK, I, Not, vars
-    <1>2 proc(0) /\ (pc[0] = "a3a" /\ Wait(1) /\ Inv /\ turn = 0) => (pc[0] = "a3b" /\ Wait(1) /\ Inv /\ turn = 0)'
-        BY DEF Wait, Q1, WillEnterCSNext, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs
-    <1>3 proc(1) /\ (pc[0] = "a3a" /\ Wait(1) /\ Inv /\ turn = 0) => (pc[0] = "a3a" /\ Wait(1) /\ Inv /\ turn = 0)' 
-        BY DEF Wait, Q1, WillEnterCSNext, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs
-    <1>6 QED
-        BY <1>1, <1>2, <1>3 DEF Next     
-
-LEMMA P2_3_1_3_b == <<Next /\ proc(0)>>_vars /\ (pc[0] = "a3a" /\ Wait(1) /\ Inv /\ turn = 0) => (pc[0] = "a3b" /\ Wait(1) /\ Inv /\ turn = 0)'
-        BY DEF Wait, Q1, WillEnterCSNext, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs
-
-LEMMA P2_3_1_3_c == (pc[0] = "a3a" /\ Wait(1) /\ Inv /\ turn = 0) => ENABLED <<proc(0)>>_vars
-    PROOF OMITTED
-
-LEMMA 2_3_1_2_a == [Next]_vars /\ (turn = 1 /\ pc[1] = "a2" /\ Q1) => (turn = 1 /\ pc[1] = "a2" /\ Q1)' \/  (Wait(1) /\ Inv /\ Wait(0) /\ turn = 0)'
-    <1>1 vars' = vars /\ (turn = 1 /\ pc[1] = "a2" /\ Q1) => (turn = 1 /\ pc[1] = "a2" /\ Q1)'
-        BY DEF  Q1, Wait, WillEnterCSNext, Inv, TypeOK, I, Not, vars
-    <1>2 proc(0) /\ (turn = 1 /\ pc[1] = "a2" /\ Q1) => (turn = 1 /\ pc[1] = "a2" /\ Q1)'    
-        BY DEF Wait, Q1, WillEnterCSNext, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs
-    <1>3 proc(1) /\ (turn = 1 /\ pc[1] = "a2" /\ Q1) => (Wait(1) /\ Inv /\ Wait(0) /\ turn = 0)'
-        BY DEF Wait, Q1, WillEnterCSNext, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs
-    <1>6 QED
-        BY <1>1, <1>2, <1>3 DEF Next
-    
-LEMMA 2_3_1_2_b == <<Next /\ proc(1)>>_vars /\ (turn = 1 /\ pc[1] = "a2" /\ Q1) => (Wait(1) /\ Inv /\ Wait(0) /\ turn = 0)'
-    BY DEF Wait, Q1, WillEnterCSNext, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs
-
-LEMMA 2_3_1_2_c == (turn = 1 /\ pc[1] = "a2" /\ Q1) => ENABLED <<proc(1)>>_vars
-    PROOF OMITTED
-         
+                 
 LEMMA 2_3_1_1_2_1_a == [Next]_vars /\ (turn = 0 /\ pc[0] = "a3b" /\ pc[1] = "a2" /\ Q1) => (turn = 0 /\ pc[0] = "a3b" /\ pc[1] = "a2" /\ Q1)' \/ CS(0)'
     <1>1 vars' = vars /\  (turn = 0 /\ pc[0] = "a3b" /\ pc[1] = "a2" /\ Q1) => (turn = 0 /\ pc[0] = "a3b" /\ pc[1] = "a2" /\ Q1)'
         BY DEF  Q1, Wait, WillEnterCSNext, Inv, TypeOK, I, Not, vars
@@ -443,7 +452,10 @@ LEMMA 2_3_1_1_2_1_b == <<Next /\ proc(0)>>_vars /\ (turn = 0 /\ pc[0] = "a3b" /\
 
 LEMMA 2_3_1_1_2_1_c == (turn = 0 /\ pc[0] = "a3b" /\ pc[1] = "a2" /\ Q1) => ENABLED <<proc(0)>>_vars 
     PROOF OMITTED 
-          
+
+LEMMA a1_NotFlag == (pc[1] = "a1" /\ Q1) => turn = 1 /\ pc[0] = "a3b" /\ ~flag[1]
+    BY DEF Q1, Inv, TypeOK, I, Not, Wait, WillEnterCSNext
+            
 LEMMA 2_3_1_1_2_2_a == [Next]_vars /\ (turn = 0 /\ pc[0] = "a3a" /\ pc[1] = "a2" /\ Q1) => (turn = 0 /\ pc[0] = "a3a" /\ pc[1] = "a2" /\ Q1)' \/ (Wait(1) /\ Q1)' \/ P1'
     <1>1 vars' = vars /\ (turn = 0 /\ pc[0] = "a3a" /\ pc[1] = "a2" /\ Q1) => (turn = 0 /\ pc[0] = "a3a" /\ pc[1] = "a2" /\ Q1)'
         BY DEF  Q1, Wait, WillEnterCSNext, Inv, TypeOK, I, Not, vars
@@ -485,10 +497,59 @@ LEMMA 2_3_CASE_a2_1 == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => 
     <1>6 Q1 => turn = 0 \/ turn = 1
         BY DEF Q1, Inv, TypeOK
     <1>7 QED
-        BY <1>1, <1>5, <1>6, PTL
+        BY <1>1, <1>5, <1>6, PTL        
 
-LEMMA a1_NotFlag == (pc[1] = "a1" /\ Q1) => turn = 1 /\ pc[0] = "a3b" /\ ~flag[1]
-    BY DEF Q1, Inv, TypeOK, I, Not, Wait, WillEnterCSNext
+LEMMA LP2_a3a_a == [Next]_vars /\ (pc[0] = "a3a" /\ P2) => (pc[0] = "a3a" /\ P2)' \/ (pc[1] = "a2" /\ Q1)' \/ CS(0)'
+    <1>1 vars' = vars /\ (pc[0] = "a3a" /\ P2) => (pc[0] = "a3a" /\ P2)'
+        BY DEF  P2, Wait, WillEnterCSNext, Inv, TypeOK, I, Not, vars
+    <1>2 proc(0) /\  (pc[0] = "a3a" /\ P2) => CS(0)'
+        BY DEF Wait, P2, WillEnterCSNext, CS, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs
+    <1>3 proc(1) /\ (pc[0] = "a3a" /\ P2) => (pc[1] = "a2" /\ Q1)'
+        BY DEF Wait, P2, Q1, WillEnterCSNext, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs
+    <1>4 QED    
+        BY <1>1, <1>2, <1>3 DEF Next
+        
+LEMMA LP2_a3a_b == <<Next /\ proc(0)>>_vars /\ (pc[0] = "a3a" /\ P2) => CS(0)'
+        BY DEF Wait, P2, WillEnterCSNext, CS, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs
+
+LEMMA LP2_a3a_c == <<Next /\ proc(1)>>_vars /\ (pc[0] = "a3a" /\ P2) => (pc[1] = "a2" /\ Q1)'
+        BY DEF Wait, P2, Q1, WillEnterCSNext, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs
+
+LEMMA LP2_a3a_d == (pc[0] = "a3a" /\ P2) => ENABLED <<proc(0)>>_vars
+    PROOF OMITTED
+
+LEMMA LP2_a3a_e == (pc[0] = "a3a" /\ P2) => ENABLED <<proc(1)>>_vars
+    PROOF OMITTED
+
+LEMMA LP2_a3a == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => (pc[0] = "a3a" /\ P2) ~> ((pc[1] = "a2" /\ Q1) \/ CS(0))
+    BY LP2_a3a_a, LP2_a3a_b, LP2_a3a_c, LP2_a3a_d, LP2_a3a_e, PTL
+
+LEMMA LP2_a3b_b == <<Next /\ proc(0)>>_vars /\ (pc[0] = "a3b" /\ P2) => CS(0)'
+    BY DEF Wait, P2, WillEnterCSNext, CS, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs
+
+LEMMA LP2_a3b_c == <<Next /\ proc(1)>>_vars /\ (pc[0] = "a3b" /\ P2) => P1'
+    BY DEF Wait, P2, WillEnterCSNext, P1, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs
+
+LEMMA LP2_a3b_a == [Next]_vars /\ (pc[0] = "a3b" /\ P2) => (pc[0] = "a3b" /\ P2)' \/ P1' \/ CS(0)'
+    <1>1 vars' = vars /\ (pc[0] = "a3b" /\ P2) => (pc[0] = "a3b" /\ P2)'
+        BY DEF  P2, Wait, WillEnterCSNext, Inv, TypeOK, I, Not, vars
+    <1>4 QED
+        BY <1>1, LP2_a3b_b, LP2_a3b_c DEF Next
+
+LEMMA LP2_a3b_d == (pc[0] = "a3b" /\ P2) => ENABLED <<proc(0)>>_vars
+    PROOF OMITTED
+
+LEMMA LP2_a3b_e == (pc[0] = "a3b" /\ P2) => ENABLED <<proc(1)>>_vars
+    PROOF OMITTED
+
+LEMMA LP2_a3b == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => (pc[0] = "a3b" /\ P2) ~> (P1 \/ CS(0))
+    BY LP2_a3b_a, LP2_a3b_b, LP2_a3b_c, LP2_a3b_d, LP2_a3b_e, PTL  
+
+LEMMA LP2 == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => P2 ~> CS(0)
+    BY LP2_a3a, LP2_a3b, LP1, 2_3_CASE_a2_1, PTL DEF P2, Wait
+
+LEMMA 2_3_NOT_WAIT == TypeOK => (~Wait(1) <=> (pc[1] = "cs" \/ pc[1] = "a4" \/ pc[1] = "a1" \/ pc[1] = "a2"))
+    BY DEF Wait, TypeOK    
 
 LEMMA 2_3_a1_1_1_1_a == [Next]_vars /\ (pc[1] = "a1" /\ Q1) => (pc[1] = "a1" /\ Q1)' \/ (pc[1] = "a2" /\ Q1)' \/ P2'
     <1>1 vars' = vars /\ (pc[1] = "a1" /\ Q1) => (pc[1] = "a1" /\ Q1)'
@@ -516,7 +577,37 @@ LEMMA 2_3_CASE_a1_1 == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => 
     <1>1 [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => (pc[1] = "a1" /\ Q1) ~> (pc[1] = "a2" /\ Q1) \/ P2
         BY 2_3_a1_1_1_1_a, 2_3_a1_1_1_1_b, 2_3_a1_1_1_1_c, PTL
     <1>2 QED
-        BY <1>1, 2_3_CASE_a2_1, LLP2, PTL
+        BY <1>1, 2_3_CASE_a2_1, LP2, PTL
+        
+LEMMA a4_P1_a == [Next]_vars /\  (pc[1] = "a4" /\ Q1) => (pc[1] = "a4" /\ Q1)' \/ (pc[1] = "a1" /\ Q1)' \/ P2'
+    <1>1 vars' = vars /\ (pc[1] = "a4" /\ Q1) => (pc[1] = "a4" /\ Q1)'
+        BY DEF  Q1, Wait, WillEnterCSNext, Inv, TypeOK, I, Not, vars
+    <1>2 proc(0) /\ (pc[1] = "a4" /\ Q1) => (pc[1] = "a4" /\ Q1)'    
+        BY DEF Wait, Q1, WillEnterCSNext, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs
+    <1>3 pc[0] = "a3a" /\ proc(1) /\ pc[1] = "a4" /\ Q1 => P2'    
+        BY DEF Wait, Q1, P2, WillEnterCSNext, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs
+    <1>4 pc[0] = "a3b" /\ proc(1) /\ pc[1] = "a4" /\ Q1 => (pc[1] = "a1" /\ Q1)'
+        BY DEF Wait, Q1, WillEnterCSNext, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs
+    <1>5 QED
+        BY <1>1, <1>2, <1>3, <1>4 DEF Next, Wait, Q1
+        
+LEMMA a4_P1_b == <<Next /\ proc(1)>>_vars /\ (pc[1] = "a4" /\ Q1) => ((pc[1] = "a1" /\ Q1) \/ P2)'            
+    BY DEF Wait, Q1, P2, WillEnterCSNext, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs
+
+LEMMA a4_P1_c == (pc[1] = "a4" /\ Q1) => ENABLED <<proc(1)>>_vars
+    PROOF OMITTED         
+    
+LEMMA 2_3_CASE_a4_1 == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => (pc[1] = "a4" /\ Q1) ~> CS(0)
+    <1>1 [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => (pc[1] = "a4" /\ Q1) ~> (pc[1] = "a1" /\ Q1) \/ P2
+        BY a4_P1_a, a4_P1_b, a4_P1_c, PTL  
+    <1>2 QED
+        BY <1>1, LP2, 2_3_CASE_a1_1, PTL       
+        
+LEMMA 2_3_CASE_CS_1 == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => (pc[1] = "cs" /\ Q1) ~> CS(0)
+    <1>1 [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => (pc[1] = "cs" /\ Q1) ~> (pc[1] = "a4" /\ Q1)
+        BY P1_cs_a4_a, P1_cs_a4_b, P1_cs_a4_c, PTL DEF Next, proc
+    <1>2 QED
+        BY <1>1, 2_3_CASE_a4_1, PTL         
 
 LEMMA 2_3_CASE_WAIT_2 == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => (~Wait(1) /\ Q1) ~> CS(0)
     BY 2_3_CASE_CS_1, 2_3_CASE_a4_1, 2_3_CASE_a1_1, 2_3_CASE_a2_1, 2_3_NOT_WAIT, PTL DEF Wait, Q1, Inv, TypeOK
@@ -526,7 +617,7 @@ THEOREM Liveness == Spec /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => Wait(0) ~> C
     <2>1 SUFFICES [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => (Inv /\ Wait(0)) ~> CS(0)
         BY PTL
     <2>2 [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => (Inv /\ Wait(0) /\ WillEnterCSNext(0)) ~> CS(0)
-        BY LP1, LLP2, PTL DEF P1, P2
+        BY LP1, LP2, PTL DEF P1, P2
     <2>3 [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => (Inv /\ Wait(0) /\ ~WillEnterCSNext(0)) ~> CS(0)
         BY 2_3_CASE_WAIT_1, 2_3_CASE_WAIT_2, PTL DEF Wait, Q1, Inv, TypeOK, Not
     <2>5 QED
@@ -536,5 +627,5 @@ THEOREM Liveness == Spec /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => Wait(0) ~> C
     
 =============================================================================
 \* Modification History
-\* Last modified Mon Sep 21 03:40:06 AEST 2020 by raghavendra
+\* Last modified Mon Sep 21 05:53:00 AEST 2020 by raghavendra
 \* Created Mon Aug 31 12:09:32 AEST 2020 by raghavendra
