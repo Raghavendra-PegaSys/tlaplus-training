@@ -388,11 +388,49 @@ LEMMA 2_3_CASE_WAIT_1 == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) =
     <1>8 QED
         BY <1>2, <1>6, <1>7, PTL
 
+LEMMA H2 == Inv /\ turn = 0 /\ Wait(1) /\ pc[0] = "a3b" => P1
+    BY DEF Inv, Wait, TypeOK, I, Not, P1, WillEnterCSNext
+
+LEMMA 2_3_1_2_a == [Next]_vars /\ (pc[0] = "a3a" /\ Wait(1) /\ Inv /\ turn = 0) => (pc[0] = "a3a" /\ Wait(1) /\ Inv /\ turn = 0)' \/  (pc[0] = "a3b" /\ Wait(1) /\ Inv /\ turn = 0)'
+    <1>1 vars' = vars /\ (pc[0] = "a3a" /\ Wait(1) /\ Inv /\ turn = 0) => (pc[0] = "a3a" /\ Wait(1) /\ Inv /\ turn = 0)'
+        BY DEF  Q1, Wait, WillEnterCSNext, Inv, TypeOK, I, Not, vars
+    <1>2 proc(0) /\ (pc[0] = "a3a" /\ Wait(1) /\ Inv /\ turn = 0) => (pc[0] = "a3b" /\ Wait(1) /\ Inv /\ turn = 0)'
+        BY DEF Wait, Q1, WillEnterCSNext, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs
+    <1>3 proc(1) /\ (pc[0] = "a3a" /\ Wait(1) /\ Inv /\ turn = 0) => (pc[0] = "a3a" /\ Wait(1) /\ Inv /\ turn = 0)' 
+        BY DEF Wait, Q1, WillEnterCSNext, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs
+    <1>6 QED
+        BY <1>1, <1>2, <1>3 DEF Next     
+
+LEMMA 2_3_1_2_b == <<Next /\ proc(0)>>_vars /\ (pc[0] = "a3a" /\ Wait(1) /\ Inv /\ turn = 0) => (pc[0] = "a3b" /\ Wait(1) /\ Inv /\ turn = 0)'
+        BY DEF Wait, Q1, WillEnterCSNext, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs
+
+LEMMA 2_3_1_2_c == (pc[0] = "a3a" /\ Wait(1) /\ Inv /\ turn = 0) => ENABLED <<proc(0)>>_vars
+    PROOF OMITTED
+
+LEMMA 2_3_1_1_a == [Next]_vars /\ (pc[1] = "a2" /\ Q1) => (pc[1] = "a2" /\ Q1)' \/  (Wait(1) /\ Inv /\ Wait(0) /\ turn = 0)'
+    <1>1 vars' = vars /\ (pc[1] = "a2" /\ Q1) => (pc[1] = "a2" /\ Q1)'
+        BY DEF  Q1, Wait, WillEnterCSNext, Inv, TypeOK, I, Not, vars
+    <1>2 proc(0) /\ (pc[1] = "a2" /\ Q1) => (pc[1] = "a2" /\ Q1)'    
+        BY DEF Wait, Q1, WillEnterCSNext, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs
+    <1>3 proc(1) /\ (pc[1] = "a2" /\ Q1) => (Wait(1) /\ Inv /\ Wait(0) /\ turn = 0)'
+        BY DEF Wait, Q1, WillEnterCSNext, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs
+    <1>6 QED
+        BY <1>1, <1>2, <1>3 DEF Next
+    
+LEMMA 2_3_1_1_b == <<Next /\ proc(1)>>_vars /\ (pc[1] = "a2" /\ Q1) => (Wait(1) /\ Inv /\ Wait(0) /\ turn = 0)'
+
+LEMMA 2_3_1_1_c == (pc[1] = "a2" /\ Q1) => ENABLED <<proc(1)>>_vars
+    PROOF OMITTED
+         
 LEMMA 2_3_CASE_a2_1 == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => (pc[1] = "a2" /\ Q1) ~> CS(0)
-    <1>1 [][Next]_vars /\ WF_vars(Next) => (pc[1] = "a2" /\ Q1) ~> P1
-        <2>6 QED
-    <1>2 QED
-        BY <1>1, LP1, PTL
+    <1>1 [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => (pc[1] = "a2" /\ Q1) ~> (Wait(1) /\ Inv /\ Wait(0) /\ turn = 0)
+        BY 2_3_1_1_a, 2_3_1_1_b, 2_3_1_1_c, PTL 
+    <1>2 [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => (pc[0] = "a3a" /\ Wait(1) /\ Inv /\ turn = 0) ~> (pc[0] = "a3b" /\ Wait(1) /\ Inv /\ turn = 0)
+        BY 2_3_1_2_a, 2_3_1_2_b, 2_3_1_2_c, PTL DEF Next
+    <1>3 [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => (pc[0] = "a3b" /\ Wait(1) /\ Inv /\ turn = 0) ~> CS(0)
+        BY H2, LP1, PTL
+    <1>6 QED
+        BY <1>1, <1>2, <1>3, PTL DEF Q1, Wait, Inv, TypeOK, I
 
 LEMMA 2_3_CASE_a1_1 == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => (pc[1] = "a1" /\ Q1) ~> CS(0)
     <1>1 [][Next]_vars /\ WF_vars(Next) => (pc[1] = "a1" /\ Q1) ~> (pc[1] = "a2" /\ Q1)
@@ -419,5 +457,5 @@ THEOREM Liveness == Spec /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => Wait(0) ~> C
     
 =============================================================================
 \* Modification History
-\* Last modified Sun Sep 20 22:56:46 AEST 2020 by raghavendra
+\* Last modified Mon Sep 21 01:01:39 AEST 2020 by raghavendra
 \* Created Mon Aug 31 12:09:32 AEST 2020 by raghavendra
