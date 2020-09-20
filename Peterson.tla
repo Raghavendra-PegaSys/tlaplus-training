@@ -315,31 +315,70 @@ LEMMA 2_3_CASE_CS_1 == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => 
     <1>2 QED
         BY <1>1, 2_3_CASE_a4_1, PTL
         
-LEMMA H1 == pc[1] = "a3a" => flag[1]
+LEMMA H1 == (turn = 0 /\ Wait(1) /\ Q1) => pc[0] = "a3a"
+    BY DEF Q1, Inv, TypeOK, I, Wait, WillEnterCSNext, Not
 
-LEMMA P1_a3a_a3b_a == [Next]_vars /\ (pc[1] = "a3a" /\ Q1) => (pc[1] = "a3a" /\ Q1)' \/ (pc[1] = "a3b" /\ Q1)' \/ (CS(0))'       
-    <1>1 vars' = vars /\ (pc[1] = "a3a" /\ Q1) => (pc[1] = "a3a" /\ Q1)'
+LEMMA P0_a3a_a3b_a == [Next]_vars /\ (turn = 0 /\ Wait(1) /\ Q1) => (turn = 0 /\ Wait(1) /\ Q1)' \/ (turn = 0 /\ pc[0] = "a3b" /\ Wait(1) /\ Inv)'       
+    <1>1 vars' = vars /\ (turn = 0 /\ Wait(1) /\ Q1) => (turn = 0 /\ Wait(1) /\ Q1)'
         BY DEF vars, Q1, Wait, WillEnterCSNext, Inv, TypeOK, I, Not
-    <1>2 proc(1) /\ (pc[1] = "a3a" /\ Q1) => (pc[1] = "a3b" /\ Q1)'
+    <1>2 proc(1) /\ (turn = 0 /\ Wait(1) /\ Q1) => (turn = 0 /\ Wait(1) /\ Q1)'
         BY DEF Wait, Q1, WillEnterCSNext, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs
-    <1>3 turn = 1 /\ pc[0] = "a3a" /\ proc(0) /\ pc[1] = "a3a" /\ Q1 => (pc[1] = "a3a" /\ Q1)'
-        \* Need to ensure that ~WillEnterCSNext(), meaning turn = 1
+    <1>3 proc(0) /\ (turn = 0 /\ Wait(1) /\ Q1) => (turn = 0 /\ pc[0] = "a3b" /\ Wait(1) /\ Inv)'
         BY H1 DEF Wait, Q1, WillEnterCSNext, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs
-        
-    <1>4 pc[0] = "a3b" /\ proc(0) /\ (pc[1] = "a3a" /\ Q1) => (pc[1] = "a3a" /\ Q1)'
-        BY DEF Wait, Q1, WillEnterCSNext, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs
-    <1>6 QED    
+    <1>6 QED
+        BY <1>1, <1>2, <1>3 DEF Next    
 
+LEMMA P0_a3a_a3b_b == <<Next /\ proc(0)>>_vars /\ (turn = 0 /\ Wait(1) /\ Q1) => (turn = 0 /\ pc[0] = "a3b" /\ Wait(1) /\ Inv)' 
+    BY H1 DEF Wait, Q1, WillEnterCSNext, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs
+
+LEMMA P0_a3a_a3b_c == (turn = 0 /\ Wait(1) /\ Q1) => ENABLED <<proc(0)>>_vars
+    PROOF OMITTED 
+    
 LEMMA Appeal_P1 == (turn = 0 /\ pc[0] = "a3b" /\ Wait(1) /\ Inv) => P1
     BY DEF Wait, WillEnterCSNext, P1, Inv, TypeOK, I, Not
-            
+
+LEMMA 2_3_1_3_a == [Next]_vars /\ (turn = 1 /\ pc[1] = "a3a" /\ Q1) => (turn = 1 /\ pc[1] = "a3a" /\ Q1)' \/  (turn = 1 /\ pc[1] = "a3b" /\ Q1)'
+    <1>1 vars' = vars /\  (turn = 1 /\ pc[1] = "a3a" /\ Q1) => (turn = 1 /\ pc[1] = "a3a" /\ Q1)'
+        BY DEF Q1, Wait, WillEnterCSNext, Inv, TypeOK, I, Not, vars
+    <1>2 proc(1) /\  (turn = 1 /\ pc[1] = "a3a" /\ Q1) => (turn = 1 /\ pc[1] = "a3b" /\ Q1)'
+        BY DEF Wait, Q1, WillEnterCSNext, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs
+    <1>3 proc(0) /\  (turn = 1 /\ pc[1] = "a3a" /\ Q1) => (turn = 1 /\ pc[1] = "a3a" /\ Q1)'
+        BY DEF Wait, Q1, WillEnterCSNext, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs     
+    <1>6 QED
+        BY <1>1, <1>2, <1>3 DEF Next
+        
+LEMMA 2_3_1_3_b == <<Next /\ proc(1)>>_vars  /\  (turn = 1 /\ pc[1] = "a3a" /\ Q1) => (turn = 1 /\ pc[1] = "a3b" /\ Q1)'
+    BY DEF Wait, Q1, WillEnterCSNext, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs
+
+LEMMA 2_3_1_3_c == (turn = 1 /\ pc[1] = "a3a" /\ Q1) => ENABLED <<proc(1)>>_vars
+    PROOF OMITTED       
+              
+LEMMA 2_3_1_4_a == [Next]_vars /\ (turn = 1 /\ pc[1] = "a3b" /\ Q1) => (turn = 1 /\ pc[1] = "a3b" /\ Q1)' \/  (pc[1] = "cs" /\ Q1)'
+    <1>1 vars' = vars /\  (turn = 1 /\ pc[1] = "a3b" /\ Q1) => (turn = 1 /\ pc[1] = "a3b" /\ Q1)'
+        BY DEF Q1, Wait, WillEnterCSNext, Inv, TypeOK, I, Not, vars
+    <1>2 proc(1) /\  (turn = 1 /\ pc[1] = "a3b" /\ Q1) => (pc[1] = "cs" /\ Q1)'
+        BY DEF Wait, Q1, WillEnterCSNext, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs
+    <1>3 proc(0) /\  (turn = 1 /\ pc[1] = "a3b" /\ Q1) => (turn = 1 /\ pc[1] = "a3b" /\ Q1)'
+        BY DEF Wait, Q1, WillEnterCSNext, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs     
+    <1>6 QED
+        BY <1>1, <1>2, <1>3 DEF Next
+        
+LEMMA 2_3_1_4_b == <<Next /\ proc(1)>>_vars  /\  (turn = 1 /\ pc[1] = "a3b" /\ Q1) => (pc[1] = "cs" /\ Q1)'
+    BY DEF Wait, Q1, WillEnterCSNext, Inv, TypeOK, I, Not, proc, a3a_a3b, a1, a2, a3a_cs, a3b_cs, a3b_a3a, a4, cs
+
+LEMMA 2_3_1_4_c == (turn = 1 /\ pc[1] = "a3b" /\ Q1) => ENABLED <<proc(1)>>_vars
+    PROOF OMITTED       
+
 LEMMA 2_3_CASE_WAIT_1 == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => (Wait(1) /\ Q1) ~> CS(0)
     \* Because Wait(0) is true we have flag[0]. So a3a_a3b(1) holds if pc[1] = "a3a"
     <1>1 [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => (turn = 0 /\ Wait(1) /\ Q1) ~> (turn = 0 /\ pc[0] = "a3b" /\ Wait(1) /\ Inv)
+        BY P0_a3a_a3b_a, P0_a3a_a3b_b, P0_a3a_a3b_c, PTL
     <1>2 [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => (turn = 0 /\ Wait(1) /\ Q1) ~> CS(0)
         BY <1>1, LP1, Appeal_P1, PTL DEF Wait
     <1>3 [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => (turn = 1 /\ pc[1] = "a3a" /\ Q1) ~> (turn = 1 /\ pc[1] = "a3b" /\ Q1)
+        BY 2_3_1_3_a, 2_3_1_3_b, 2_3_1_3_c, PTL
     <1>4 [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => (turn = 1 /\ pc[1] = "a3b" /\ Q1) ~> (pc[1] = "cs" /\ Q1)
+        BY 2_3_1_4_a, 2_3_1_4_b, 2_3_1_4_c, PTL
     <1>5 [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => (turn = 1 /\ Wait(1) /\ Q1) ~> (pc[1] = "cs" /\ Q1)
         BY <1>3, <1>4, PTL DEF Wait, Q1, Inv, TypeOK
     <1>6 [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => (turn = 1 /\ Wait(1) /\ Q1) ~> CS(0)
@@ -380,5 +419,5 @@ THEOREM Liveness == Spec /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => Wait(0) ~> C
     
 =============================================================================
 \* Modification History
-\* Last modified Sun Sep 20 01:37:17 AEST 2020 by raghavendra
+\* Last modified Sun Sep 20 22:56:46 AEST 2020 by raghavendra
 \* Created Mon Aug 31 12:09:32 AEST 2020 by raghavendra
