@@ -134,11 +134,13 @@ LEMMA LP1b == <<Next /\ proc(0)>>_vars /\ P1 => CS(0)'
      
 LEMMA LP1a == [Next]_vars /\ P1 => P1' \/ CS(0)'
     <1>1 vars' = vars /\ P1 => P1'
-        BY DEF vars, P1, Inv, TypeOK, I        
-    <1>2 proc(1) /\ P1 => P1'
+        BY DEF vars, P1, Inv, TypeOK, I  
+    <1>2 proc(1) /\ P1 => (I /\ pc[0] = "a3b" /\ turn = 0)'
+        BY DEF Inv, TypeOK, I, P1, proc, I, Not, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4          
+    <1>3 proc(1) /\ P1 => (TypeOK)'
         BY  DEF P1, Inv, TypeOK, I, Not, proc, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4
     <1>6 QED    
-        BY <1>1, <1>2, LP1b DEF Next
+        BY <1>1, <1>2, <1>3, LP1b DEF Next, P1, Inv
 
 LEMMA LP1c == P1 => ENABLED <<proc(0)>>_vars
     PROOF OMITTED
@@ -155,10 +157,12 @@ LEMMA LP2b == <<Next /\ proc(0)>>_vars /\ P2 => P1' \/ CS(0)'
 LEMMA LP2a == [Next]_vars /\ P2 => P2' \/ P1' \/ CS(0)'
     <1>1 vars' = vars /\ P2 => P2'
         BY DEF vars, P2, Inv, TypeOK, I        
-    <1>2 proc(1) /\ P2 => P2'
+    <1>2 proc(1) /\ P2 => TypeOK'
+        BY  DEF P2, Inv, TypeOK, I, Not, proc, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4
+    <1>3 proc(1) /\ P2 => (I /\ pc[0] = "a3a" /\ turn = 0)'
         BY  DEF P2, Inv, TypeOK, I, Not, proc, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4
     <1>6 QED    
-        BY <1>1, <1>2, LP2b DEF Next
+        BY <1>1, <1>2, <1>3, LP2b DEF Next, P2, Inv
 
 LEMMA LP2c == P2 => ENABLED <<proc(0)>>_vars
     PROOF OMITTED
@@ -365,5 +369,5 @@ THEOREM Liveness == Spec /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => Wait(0) ~> C
     BY Invariance, <1>1 DEF Init, Spec, Wait, CS, Next, proc, Inv, TypeOK, I, Not    
 =============================================================================
 \* Modification History
-\* Last modified Tue Oct 06 00:55:34 AEST 2020 by raghavendra
+\* Last modified Tue Oct 06 01:04:00 AEST 2020 by raghavendra
 \* Created Mon Oct 05 23:14:50 AEST 2020 by raghavendra
