@@ -158,12 +158,13 @@ LEMMA LP2a == [Next]_vars /\ P2 => P2' \/ P1' \/ CS(0)'
     <1>2 proc(1) /\ P2 => P2'
         BY  DEF P2, Inv, TypeOK, I, Not, proc, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4
     <1>6 QED    
-        BY <1>1, <1>2, LP1b DEF Next
+        BY <1>1, <1>2, LP2b DEF Next
 
 LEMMA LP2c == P2 => ENABLED <<proc(0)>>_vars
     PROOF OMITTED
     
 LEMMA LP2 == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => P2 ~> P1 \/ CS(0)
+    BY LP2a, LP2b, LP2c, PTL DEF Next
 
 \**********
 
@@ -174,17 +175,75 @@ LEMMA LP == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) =>  P ~> CS(0)
 \**********
   
 Q1 == Inv /\ Wait(0) /\ turn = 1 /\ flag[1] /\ pc[1] = "a2"
+
+LEMMA LQ1b == <<Next /\ proc(1)>>_vars /\ Q1 => P'
+    BY DEF CS, P, Q1, Inv, TypeOK, I, proc, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4, Not, Wait
+     
+LEMMA LQ1a == [Next]_vars /\ Q1 => Q1' \/ P'
+    <1>1 vars' = vars /\ Q1 => Q1'
+        BY DEF vars, Q1, Inv, TypeOK, I, Wait        
+    <1>2 proc(0) /\ Q1 => Q1'
+        BY  DEF Q1, Inv, TypeOK, I, Not, proc, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4, Wait
+    <1>6 QED    
+        BY <1>1, <1>2, LQ1b DEF Next
+
+LEMMA LQ1c == Q1 => ENABLED <<proc(1)>>_vars
+    PROOF OMITTED
+    
+
 LEMMA LQ1 == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) =>  Q1 ~> P
+    BY LQ1a, LQ1b, LQ1c, PTL DEF Next
 
 \**********
      
 Q2 == Inv /\ pc[0] = "a3a" /\ turn = 1 /\ ~flag[1]
+
+LEMMA LQ2b == <<Next /\ proc(0)>>_vars /\ Q2 => CS(0)'
+    BY DEF CS, Q2, Inv, TypeOK, I, proc, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4, Not, Wait
+
+LEMMA LQ2d == <<Next /\ proc(1)>>_vars /\ Q2 => Q1'
+    BY DEF CS, Q2, Q1, Inv, TypeOK, I, proc, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4, Not, Wait
+     
+LEMMA LQ2a == [Next]_vars /\ Q2 => Q2' \/ Q1' \/ CS(0)'
+    <1>1 vars' = vars /\ Q2 => Q2'
+        BY DEF vars, Q2, Inv, TypeOK, I, Wait        
+    <1>6 QED    
+        BY <1>1, LQ2b, LQ2d DEF Next
+
+LEMMA LQ2c == Q2 => ENABLED <<proc(0)>>_vars
+    PROOF OMITTED
+    
+LEMMA LQ2e == Q2 => ENABLED <<proc(1)>>_vars
+    PROOF OMITTED
+    
+
 LEMMA LQ2 == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) =>  Q2 ~> Q1 \/ CS(0)     
+    BY LQ2a, LQ2b, LQ2c, LQ2d, LQ2e, PTL DEF Next
 
 \**********
      
 Q3 == Inv /\ pc[0] = "a3b" /\ turn = 1 /\ ~flag[1]
+
+LEMMA LQ3b == <<Next /\ proc(0)>>_vars /\ Q3 => Q2'
+    BY DEF Q3, Q2, Inv, TypeOK, I, proc, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4, Not, Wait
+
+LEMMA LQ3d == <<Next /\ proc(1)>>_vars /\ Q3 => Q1'
+    BY DEF Q3, Q1, Inv, TypeOK, I, proc, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4, Not, Wait
+     
+LEMMA LQ3a == [Next]_vars /\ Q3 => Q3' \/ Q1' \/ Q2'
+    <1>1 vars' = vars /\ Q3 => Q3'
+        BY DEF vars, Q3, Inv, TypeOK, I, Wait        
+    <1>6 QED    
+        BY <1>1, LQ3b, LQ3d DEF Next
+
+LEMMA LQ3c == Q3 => ENABLED <<proc(0)>>_vars
+    PROOF OMITTED
+    
+LEMMA LQ3e == Q3 => ENABLED <<proc(1)>>_vars
+    PROOF OMITTED
+    
 LEMMA LQ3 == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) =>  Q3 ~> Q1 \/ Q2
+    BY LQ3a, LQ3b, LQ3c, LQ3d, LQ3e, PTL DEF Next
 
 \**********
      
@@ -197,19 +256,83 @@ LEMMA LQA == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) =>  QA ~> CS(
 Q4 == Inv /\ Wait(0) /\ turn = 1 /\ flag[1] /\ pc[1] = "a3b" 
 Q5 == Inv /\ Wait(0) /\ turn = 1 /\ flag[1] /\ pc[1] = "cs" 
 
+LEMMA LQ4b == <<Next /\ proc(1)>>_vars /\ Q4 => Q5'
+    BY DEF Q4, Q5, Inv, TypeOK, I, proc, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4, Not, Wait
+     
+LEMMA LQ4a == [Next]_vars /\ Q4 => Q4' \/ Q5'
+    <1>1 vars' = vars /\ Q4 => Q4'
+        BY DEF vars, Q4, Inv, TypeOK, I, Wait        
+    <1>2 proc(0) /\ Q4 => Q4'
+        BY  DEF Q4, Inv, TypeOK, I, Not, proc, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4, Wait
+    <1>6 QED    
+        BY <1>1, <1>2, LQ4b DEF Next
+
+LEMMA LQ4c == Q4 => ENABLED <<proc(1)>>_vars
+    PROOF OMITTED
+    
 LEMMA LQ4 == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) =>  Q4 ~> Q5
+    BY LQ4a, LQ4b, LQ4c, PTL DEF Next
       
 \**********
      
 Q6 == Inv /\ Wait(0) /\ turn = 1 /\ flag[1] /\ pc[1] = "a3a"
+
+LEMMA LQ6b == <<Next /\ proc(1)>>_vars /\ Q6 => Q4' \/ Q5'
+    BY DEF Q6, Q4, Q5, Inv, TypeOK, I, proc, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4, Not, Wait
+     
+LEMMA LQ6a == [Next]_vars /\ Q6 => Q6' \/ Q4' \/ Q5'
+    <1>1 vars' = vars /\ Q6 => Q6'
+        BY DEF vars, Q6, Inv, TypeOK, I, Wait        
+    <1>2 proc(0) /\ Q6 => Q6'
+        BY  DEF Q6, Inv, TypeOK, I, Not, proc, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4, Wait
+    <1>6 QED    
+        BY <1>1, <1>2, LQ6b DEF Next
+
+LEMMA LQ6c == Q6 => ENABLED <<proc(1)>>_vars
+    PROOF OMITTED
+    
 LEMMA LQ6 == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) =>  Q6 ~> Q4 \/ Q5
+    BY LQ6a, LQ6b, LQ6c, PTL DEF Next
  
 \**********
      
 Q7 == Inv /\ Wait(0) /\ turn = 1 /\ flag[1] /\ pc[1] = "a4"
-LEMMA LQ5 == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) =>  Q5 ~> Q7
 
+LEMMA LQ5b == <<Next /\ proc(1)>>_vars /\ Q5 => Q7'
+    BY DEF Q5, Q7, Inv, TypeOK, I, proc, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4, Not, Wait
+     
+LEMMA LQ5a == [Next]_vars /\ Q5 => Q5' \/ Q7'
+    <1>1 vars' = vars /\ Q5 => Q5'
+        BY DEF vars, Q5, Inv, TypeOK, I, Wait        
+    <1>2 proc(0) /\ Q5 => Q5'
+        BY  DEF Q5, Inv, TypeOK, I, Not, proc, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4, Wait
+    <1>6 QED    
+        BY <1>1, <1>2, LQ5b DEF Next
+
+LEMMA LQ5c == Q5 => ENABLED <<proc(1)>>_vars
+    PROOF OMITTED
+    
+LEMMA LQ5 == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) =>  Q5 ~> Q7
+    BY LQ5a, LQ5b, LQ5c, PTL DEF Next
+
+\**********
+
+LEMMA LQ7b == <<Next /\ proc(1)>>_vars /\ Q7 => QA'
+    BY DEF QA, Q7, Inv, TypeOK, I, proc, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4, Not, Wait
+     
+LEMMA LQ7a == [Next]_vars /\ Q7 => QA' \/ Q7'
+    <1>1 vars' = vars /\ Q7 => Q7'
+        BY DEF vars, Q7, Inv, TypeOK, I, Wait        
+    <1>2 proc(0) /\ Q7 => Q7'
+        BY  DEF Q7, Inv, TypeOK, I, Not, proc, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4, Wait
+    <1>6 QED    
+        BY <1>1, <1>2, LQ7b DEF Next
+
+LEMMA LQ7c == Q7 => ENABLED <<proc(1)>>_vars
+    PROOF OMITTED
+    
 LEMMA LQ7 == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) =>  Q7 ~> QA
+    BY LQ7a, LQ7b, LQ7c, PTL DEF Next
 
 \**********
      
@@ -242,5 +365,5 @@ THEOREM Liveness == Spec /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => Wait(0) ~> C
     BY Invariance, <1>1 DEF Init, Spec, Wait, CS, Next, proc, Inv, TypeOK, I, Not    
 =============================================================================
 \* Modification History
-\* Last modified Tue Oct 06 00:27:47 AEST 2020 by raghavendra
+\* Last modified Tue Oct 06 00:55:34 AEST 2020 by raghavendra
 \* Created Mon Oct 05 23:14:50 AEST 2020 by raghavendra
