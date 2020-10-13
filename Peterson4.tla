@@ -255,10 +255,10 @@ LEMMA LQ4 == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) =>  Q4 ~> Q5
       
 Q6 == Inv /\ Wait(0) /\ turn = 1 /\ flag[1] /\ pc[1] = "a3a"
 
-LEMMA LQ6 == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) =>  Q6 ~> Q4 \/ Q5
-    <1>1 <<Next /\ proc(1)>>_vars /\ Q6 => Q4' \/ Q5'
+LEMMA LQ6 == [][Next]_vars /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) =>  Q6 ~> Q4 
+    <1>1 <<Next /\ proc(1)>>_vars /\ Q6 => Q4'
         BY DEF Q6, Q4, Q5, Inv, TypeOK, I, proc, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4, Not, Wait
-    <1>2 [Next]_vars /\ Q6 => Q6' \/ Q4' \/ Q5'
+    <1>2 [Next]_vars /\ Q6 => Q6' \/ Q4' 
         <2>1 vars' = vars /\ Q6 => Q6'
             BY DEF vars, Q6, Inv, TypeOK, I, Wait        
         <2>2 proc(0) /\ Q6 => Q6'
@@ -331,5 +331,5 @@ THEOREM Liveness == Spec /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => Wait(0) ~> C
     BY Invariance, <1>1 DEF Init, Spec, Wait, CS, Next, proc, Inv, TypeOK, I, Not    
 =============================================================================
 \* Modification History
-\* Last modified Mon Oct 12 13:13:22 AEST 2020 by raghavendra
+\* Last modified Tue Oct 13 13:08:05 AEST 2020 by raghavendra
 \* Created Mon Oct 05 23:14:50 AEST 2020 by raghavendra
