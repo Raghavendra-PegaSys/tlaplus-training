@@ -178,7 +178,7 @@ THEOREM Liveness == Spec /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => Wait(0) ~> C
                 QA == Inv /\ Wait(0) /\ turn = 1 /\ ~flag[1]
                 QB == Inv /\ Wait(0) /\ turn = 1 /\ flag[1]
     <2>LQ1 Q1 ~> P
-        <3>1 <<Next /\ proc(1)>>_vars /\ Q1 => P'
+        <3>1 <<proc(1)>>_vars /\ Q1 => P'
             BY DEF CS, Inv, TypeOK, I, proc, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4, Not, Wait
         <3>2 [Next]_vars /\ Q1 => Q1' \/ P'
             <4>1 vars' = vars /\ Q1 => Q1'
@@ -195,10 +195,10 @@ THEOREM Liveness == Spec /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => Wait(0) ~> C
         <3>LQA QA ~> CS(0)
             <4> DEFINE  Q2 == Inv /\ pc[0] = "a3a" /\ turn = 1 /\ ~flag[1]
             <4>LQ2 Q2 ~> Q1 \/ CS(0) 
-                <5>1 <<Next /\ proc(0)>>_vars /\ Q2 => CS(0)'
+                <5>1 <<proc(0)>>_vars /\ Q2 => CS(0)'
                     BY DEF CS, Inv, TypeOK, I, proc, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4, Not, Wait
-                <5>2 <<Next /\ proc(1)>>_vars /\ Q2 => Q1'
-                    BY DEF CS, Inv, TypeOK, I, proc, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4, Not, Wait
+                <5>2 <<proc(1)>>_vars /\ Q2 => Q1'
+                    BY DEF CS, Inv, TypeOK, I, proc, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4, Not, Wait                    
                 <5>3 [Next]_vars /\ Q2 => Q2' \/ Q1' \/ CS(0)'
                     <6>1 vars' = vars /\ Q2 => Q2'
                         BY DEF vars, Inv, TypeOK, I, Wait        
@@ -212,9 +212,9 @@ THEOREM Liveness == Spec /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => Wait(0) ~> C
                     BY <2>1, <5>1, <5>2, <5>3, <5>4, <5>5, PTL DEF Next            
             <4> DEFINE Q3 == Inv /\ pc[0] = "a3b" /\ turn = 1 /\ ~flag[1]
             <4>LQ3 Q3 ~> Q1 \/ Q2
-                <5>1 <<Next /\ proc(0)>>_vars /\ Q3 => Q2'
+                <5>1 <<proc(0)>>_vars /\ Q3 => Q2'
                     BY DEF Inv, TypeOK, I, proc, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4, Not, Wait
-                <5>2 <<Next /\ proc(1)>>_vars /\ Q3 => Q1'
+                <5>2 <<proc(1)>>_vars /\ Q3 => Q1'
                     BY DEF Inv, TypeOK, I, proc, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4, Not, Wait
                 <5>3 [Next]_vars /\ Q3 => Q3' \/ Q1' \/ Q2'
                     <6>1 vars' = vars /\ Q3 => Q3'
@@ -237,7 +237,7 @@ THEOREM Liveness == Spec /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => Wait(0) ~> C
                         Q6 == Inv /\ Wait(0) /\ turn = 1 /\ flag[1] /\ pc[1] = "a3a"
                         Q7 == Inv /\ Wait(0) /\ turn = 1 /\ flag[1] /\ pc[1] = "a4"
             <4>LQ4 Q4 ~> Q5
-                <5>1 <<Next /\ proc(1)>>_vars /\ Q4 => Q5'
+                <5>1 <<proc(1)>>_vars /\ Q4 => Q5'
                     BY DEF Q4, Q5, Inv, TypeOK, I, proc, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4, Not, Wait
                 <5>2 [Next]_vars /\ Q4 => Q4' \/ Q5'
                     <6>1 vars' = vars /\ Q4 => Q4'
@@ -251,7 +251,7 @@ THEOREM Liveness == Spec /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => Wait(0) ~> C
                 <5>6 QED
                     BY <2>1, <5>1, <5>2, <5>3, PTL DEF Next            
             <4>LQ6 Q6 ~> Q4
-                <5>1 <<Next /\ proc(1)>>_vars /\ Q6 => Q4'
+                <5>1 <<proc(1)>>_vars /\ Q6 => Q4'
                     BY DEF Q6, Q4, Q5, Inv, TypeOK, I, proc, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4, Not, Wait
                 <5>2 [Next]_vars /\ Q6 => Q6' \/ Q4' 
                     <6>1 vars' = vars /\ Q6 => Q6'
@@ -265,7 +265,7 @@ THEOREM Liveness == Spec /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => Wait(0) ~> C
                 <5>4 QED 
                     BY <2>1, <5>1, <5>2, <5>3, PTL DEF Next             
             <4>LQ5 Q5 ~> Q7
-                <5>1 <<Next /\ proc(1)>>_vars /\ Q5 => Q7'
+                <5>1 <<proc(1)>>_vars /\ Q5 => Q7'
                     BY DEF Q5, Q7, Inv, TypeOK, I, proc, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4, Not, Wait
                 <5>2 [Next]_vars /\ Q5 => Q5' \/ Q7'
                     <6>1 vars' = vars /\ Q5 => Q5'
@@ -279,7 +279,7 @@ THEOREM Liveness == Spec /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => Wait(0) ~> C
                 <5>4 QED
                     BY <2>1, <5>1, <5>2, <5>3, PTL DEF Next            
             <4>LQ7 Q7 ~> QA
-                <5>1 <<Next /\ proc(1)>>_vars /\ Q7 => QA'
+                <5>1 <<proc(1)>>_vars /\ Q7 => QA'
                     BY DEF Inv, TypeOK, I, proc, a1, a2, a3a_cs, a3a_a3b, a3b_cs, a3b_a3a, cs, a4, Not, Wait
                 <5>2 [Next]_vars /\ Q7 => QA' \/ Q7'
                     <6>1 vars' = vars /\ Q7 => Q7'
@@ -302,6 +302,6 @@ THEOREM Liveness == Spec /\ WF_vars(proc(0)) /\ WF_vars(proc(1)) => Wait(0) ~> C
     BY Invariance, <1>1 DEF Init, Spec, Wait, CS, Next, proc, Inv, TypeOK, I, Not    
 =============================================================================
 \* Modification History
-\* Last modified Fri Oct 16 08:36:15 AEDT 2020 by roberto
+\* Last modified Fri Oct 16 13:59:52 AEDT 2020 by roberto
 \* Last modified Tue Oct 13 13:08:05 AEST 2020 by raghavendra
 \* Created Mon Oct 05 23:14:50 AEST 2020 by raghavendra
